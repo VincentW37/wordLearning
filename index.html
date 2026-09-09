@@ -24,7 +24,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 鎖定手機視窗高度，避免滾動 */
+    /* 鎖定手機視窗 100dvh，杜絕滾動 */
     html, body {
       height: 100%;
       height: 100dvh;
@@ -37,28 +37,35 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: env(safe-area-inset-top, 8px) 12px env(safe-area-inset-bottom, 8px) 12px;
+      padding: env(safe-area-inset-top, 10px) 12px env(safe-area-inset-bottom, 10px) 12px;
     }
 
     .container {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      justify-content: space-between; /* 頂部、主體、底部分佈 */
+      gap: 8px;
     }
 
-    /* 頂部控制列（緊湊型） */
-    .filter-section {
-      background: #fff;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
+    /* 頂部控制面板 */
+    .top-section {
       display: flex;
       flex-direction: column;
       gap: 6px;
       flex-shrink: 0;
+    }
+
+    .filter-panel {
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .filter-row {
@@ -73,11 +80,12 @@
       border-radius: 14px;
       border: 1px solid var(--border);
       background: #f8fafc;
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: #475569;
       cursor: pointer;
       user-select: none;
+      transition: all 0.15s;
     }
 
     .level-pill.active {
@@ -103,7 +111,7 @@
 
     .toggle-group {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .toggle-item {
@@ -114,8 +122,9 @@
     }
 
     .btn-random {
-      padding: 2px 8px;
+      padding: 3px 10px;
       font-size: 0.75rem;
+      font-weight: 600;
       background: var(--primary);
       color: #fff;
       border: none;
@@ -123,72 +132,78 @@
       cursor: pointer;
     }
 
-    /* 狀態提示 */
     .status-bar {
       display: flex;
       justify-content: space-between;
       font-size: 0.72rem;
       color: var(--text-muted);
       padding: 0 4px;
-      flex-shrink: 0;
     }
 
-    /* 單字卡片主體（自適應剩餘空間） */
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 10px rgba(0, 33, 71, 0.05);
+    /* 中間動態包裹區（負責垂直居中與彈性伸縮） */
+    .card-wrapper {
       flex: 1;
-      min-height: 0; /* 讓 flex 子元素能正確縮小 */
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      overflow-y: auto; /* 萬一極長例句仍可微調，但預設不會出現滾動條 */
+      justify-content: center; /* 內容少時自然在中間，不會硬扯到死角 */
+    }
+
+    /* 動態單字卡片 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 3px 14px rgba(0, 33, 71, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 100%;
+      overflow-y: auto;
     }
 
     .word-header {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 8px;
     }
 
     .word-title {
-      font-size: 1.85rem;
+      font-size: 2.2rem;
       font-weight: 700;
       color: var(--primary);
-      line-height: 1.1;
+      line-height: 1;
       letter-spacing: -0.5px;
+      word-break: break-word;
     }
 
     .pos-tag {
       font-style: italic;
       color: var(--text-muted);
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .zh-word-translation {
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 600;
       color: #047857;
-      margin: 2px 0 6px 0;
+      line-height: 1.2;
     }
 
-    /* 發音區 */
+    /* 發音列 */
     .pron-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
+      gap: 14px;
+      padding-bottom: 8px;
       border-bottom: 2px solid var(--accent-yellow);
-      flex-shrink: 0;
     }
 
     .pron-group {
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
 
     .pron-region {
@@ -199,7 +214,7 @@
 
     .ipa {
       font-family: "Lucida Sans Unicode", "DejaVu Sans", Arial, sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #334155;
     }
 
@@ -218,13 +233,11 @@
 
     .cefr-badge {
       display: inline-block;
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 4px;
       font-size: 0.72rem;
       font-weight: 700;
-      margin-bottom: 6px;
       width: fit-content;
-      flex-shrink: 0;
     }
 
     .cefr-badge.c2 { background: #fae8ff; color: #6b21a8; }
@@ -232,55 +245,52 @@
     .cefr-badge.b2, .cefr-badge.b1 { background: #e0f2fe; color: #0369a1; }
     .cefr-badge.a2, .cefr-badge.a1 { background: #dcfce7; color: #15803d; }
 
-    /* 釋義 */
+    /* 釋義區塊 */
     .def-container {
-      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .definition-en {
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 600;
-      line-height: 1.35;
+      line-height: 1.4;
       color: #1e293b;
-      margin-bottom: 2px;
     }
 
     .definition-zh {
-      font-size: 0.88rem;
+      font-size: 0.92rem;
       color: #475569;
-      line-height: 1.3;
+      line-height: 1.35;
     }
 
-    /* 例句 */
+    /* 例句緊隨其後（非死板墊底） */
     .examples-box {
-      margin-top: auto;
       background: #f8fafc;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
-      border-left: 3px solid var(--accent-blue);
-      flex-shrink: 0;
+      border-left: 3.5px solid var(--accent-blue);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .examples-title {
       font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: var(--text-muted);
-      margin-bottom: 3px;
     }
 
     .example-item {
-      font-size: 0.86rem;
-      line-height: 1.35;
+      font-size: 0.92rem;
+      line-height: 1.4;
       color: #334155;
-      margin-bottom: 2px;
     }
 
-    .example-item:last-child {
-      margin-bottom: 0;
-    }
-
-    /* 底部導覽列（常駐一屏底部） */
+    /* 底部導覽列 */
     .controls {
       display: flex;
       justify-content: space-between;
@@ -291,20 +301,20 @@
 
     .counter {
       color: var(--text-muted);
-      font-size: 0.82rem;
+      font-size: 0.85rem;
     }
 
     .nav-group {
       display: flex;
-      gap: 6px;
+      gap: 8px;
     }
 
     .nav-btn {
-      padding: 6px 14px;
+      padding: 7px 18px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: #fff;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -318,83 +328,86 @@
 </head>
 <body>
 
-  <div class="container" id="appContainer">
-    <!-- 頂部多選與設定 -->
-    <div class="filter-section">
-      <div class="filter-row">
-        <div class="level-pill" data-level="ALL">全部</div>
-        <div class="level-pill" data-level="A1">A1</div>
-        <div class="level-pill" data-level="A2">A2</div>
-        <div class="level-pill" data-level="B1">B1</div>
-        <div class="level-pill" data-level="B2">B2</div>
-        <div class="level-pill" data-level="C1">C1</div>
-        <div class="level-pill c2" data-level="C2">C2</div>
-      </div>
-
-      <div class="pref-row">
-        <div class="toggle-group">
-          <label class="toggle-item">
-            <input type="checkbox" id="showZhToggle" checked> 中文
-          </label>
-          <label class="toggle-item">
-            <input type="checkbox" id="autoPronounceToggle"> 自動發音
-          </label>
-        </div>
-        <button class="btn-random" id="randomBtn">隨機抽字</button>
-      </div>
-    </div>
-
-    <!-- 狀態列 -->
-    <div class="status-bar">
-      <span id="loadStatus">載入詞庫中...</span>
-      <span id="poolStatus">---</span>
-    </div>
-
-    <!-- 主單字卡片（支援觸控滑動切換） -->
-    <div class="card" id="touchCard">
-      <div class="word-header">
-        <h1 class="word-title" id="wordText">---</h1>
-        <span class="pos-tag" id="posText"></span>
-      </div>
-
-      <div class="zh-word-translation" id="zhWordText">---</div>
-
-      <div class="pron-bar">
-        <div class="pron-group">
-          <span class="pron-region">UK</span>
-          <button class="audio-btn" id="ukAudioBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
-          </button>
-          <span class="ipa" id="ukIpa"></span>
+  <div class="container">
+    <!-- 頂部區塊 -->
+    <div class="top-section">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <div class="level-pill" data-level="ALL">全部</div>
+          <div class="level-pill" data-level="A1">A1</div>
+          <div class="level-pill" data-level="A2">A2</div>
+          <div class="level-pill" data-level="B1">B1</div>
+          <div class="level-pill" data-level="B2">B2</div>
+          <div class="level-pill" data-level="C1">C1</div>
+          <div class="level-pill c2" data-level="C2">C2</div>
         </div>
 
-        <div class="pron-group">
-          <span class="pron-region">US</span>
-          <button class="audio-btn" id="usAudioBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
-          </button>
-          <span class="ipa" id="usIpa"></span>
+        <div class="pref-row">
+          <div class="toggle-group">
+            <label class="toggle-item">
+              <input type="checkbox" id="showZhToggle" checked> 中文
+            </label>
+            <label class="toggle-item">
+              <input type="checkbox" id="autoPronounceToggle"> 自動發音
+            </label>
+          </div>
+          <button class="btn-random" id="randomBtn">隨機抽字</button>
         </div>
       </div>
 
-      <div id="cefrBadge" class="cefr-badge b2">B2</div>
-
-      <div class="def-container">
-        <div class="definition-en" id="defEnText">---</div>
-        <div class="definition-zh" id="defZhText">---</div>
-      </div>
-
-      <div class="examples-box">
-        <div class="examples-title">Example</div>
-        <div id="examplesContainer">---</div>
+      <div class="status-bar">
+        <span id="loadStatus">載入詞庫中...</span>
+        <span id="poolStatus">---</span>
       </div>
     </div>
 
-    <!-- 底部控制按鈕（不需向下滑動即時按到） -->
+    <!-- 中間卡片：自適應長短、垂直平衡置中 -->
+    <div class="card-wrapper">
+      <div class="card" id="touchCard">
+        <div class="word-header">
+          <h1 class="word-title" id="wordText">---</h1>
+          <span class="pos-tag" id="posText"></span>
+        </div>
+
+        <div class="zh-word-translation" id="zhWordText">---</div>
+
+        <div class="pron-bar">
+          <div class="pron-group">
+            <span class="pron-region">UK</span>
+            <button class="audio-btn" id="ukAudioBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+            </button>
+            <span class="ipa" id="ukIpa"></span>
+          </div>
+
+          <div class="pron-group">
+            <span class="pron-region">US</span>
+            <button class="audio-btn" id="usAudioBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+            </button>
+            <span class="ipa" id="usIpa"></span>
+          </div>
+        </div>
+
+        <div id="cefrBadge" class="cefr-badge b2">B2</div>
+
+        <div class="def-container">
+          <div class="definition-en" id="defEnText">---</div>
+          <div class="definition-zh" id="defZhText">---</div>
+        </div>
+
+        <div class="examples-box">
+          <div class="examples-title">Example</div>
+          <div id="examplesContainer">---</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部控制按鈕 -->
     <div class="controls">
       <span class="counter" id="counterText">0 / 0</span>
       <div class="nav-group">
@@ -406,7 +419,7 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_compact";
+    const PREF_KEY = "vocab_app_prefs_dynamic";
 
     const c2WordList = [
       {
@@ -621,7 +634,7 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // 多選按鈕
+    // 難度切換
     document.querySelectorAll(".level-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const level = pill.dataset.level;
@@ -651,7 +664,7 @@
       });
     });
 
-    // 觸控左右滑動支援（Swipe）
+    // 觸控滑動
     let touchStartX = 0;
     let touchEndX = 0;
     const cardEl = document.getElementById("touchCard");
@@ -662,23 +675,15 @@
 
     cardEl.addEventListener("touchend", (e) => {
       touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, { passive: true });
-
-    function handleSwipe() {
-      const threshold = 45;
-      if (touchStartX - touchEndX > threshold && currentIndex < filteredDataset.length - 1) {
-        // 向左滑 -> 下一個
+      if (touchStartX - touchEndX > 45 && currentIndex < filteredDataset.length - 1) {
         currentIndex++;
         renderCard(filteredDataset[currentIndex]);
-      } else if (touchEndX - touchStartX > threshold && currentIndex > 0) {
-        // 向右滑 -> 上一個
+      } else if (touchEndX - touchStartX > 45 && currentIndex > 0) {
         currentIndex--;
         renderCard(filteredDataset[currentIndex]);
       }
-    }
+    }, { passive: true });
 
-    // 事件監聽
     document.getElementById("showZhToggle").addEventListener("change", () => {
       if (filteredDataset[currentIndex]) updateChineseTranslations(filteredDataset[currentIndex]);
       saveUserPreferences();
