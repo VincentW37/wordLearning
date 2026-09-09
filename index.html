@@ -1,1 +1,530 @@
-<!-- empty index.html -->
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxford 3000 / 5000 Vocab Learner</title>
+  <style>
+    :root {
+      --primary: #002147;       /* Oxford Blue */
+      --accent-blue: #0056b3;
+      --accent-yellow: #ffbf00;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* 頂部工具列 */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select, button {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.primary-btn {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 500;
+    }
+
+    button.primary-btn:hover {
+      background: var(--accent-blue);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* 載入狀態條 */
+    .status-bar {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 單字卡片 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 2.25rem;
+      box-shadow: 0 4px 20px rgba(0, 33, 71, 0.08);
+      border: 1px solid var(--border);
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .word-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .word-title {
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+
+    .pos-tag {
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* 音標與發音列 */
+    .pron-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin: 0.8rem 0 1.25rem 0;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--accent-yellow);
+    }
+
+    .pron-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pron-region {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+    }
+
+    .ipa {
+      font-family: "Lucida Sans Unicode", "DejaVu Sans", Arial, sans-serif;
+      font-size: 1.05rem;
+    }
+
+    .audio-btn {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      cursor: pointer;
+      color: var(--accent-blue);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: transform 0.15s, background 0.2s;
+    }
+
+    .audio-btn:hover {
+      transform: scale(1.1);
+      background: #dbeafe;
+    }
+
+    /* CEFR 等級標籤 */
+    .cefr-badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      width: fit-content;
+    }
+
+    .cefr-badge.c1, .cefr-badge.c2 { background: #fae8ff; color: #86198f; }
+    .cefr-badge.b1, .cefr-badge.b2 { background: #e0f2fe; color: #0369a1; }
+    .cefr-badge.a1, .cefr-badge.a2 { background: #dcfce7; color: #15803d; }
+
+    .definition {
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: #1e293b;
+      margin-bottom: 1.25rem;
+    }
+
+    .examples-box {
+      margin-top: auto;
+      background: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-blue);
+    }
+
+    .examples-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .example-item {
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: #334155;
+      margin-bottom: 0.4rem;
+    }
+
+    .example-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 底部導覽列 */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+    }
+
+    .counter {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .nav-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 頂部功能列 -->
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="搜尋或跳轉單字 (例: violent, abandon)..." />
+      
+      <!-- CEFR 難度過濾 -->
+      <select id="cefrFilter" title="按 CEFR 等級過濾">
+        <option value="ALL">全部難度</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+        <option value="C1">C1</option>
+      </select>
+
+      <button class="primary-btn" id="randomBtn">隨機抽字</button>
+
+      <label class="toggle-label">
+        <input type="checkbox" id="autoPronounce"> 切換時自動發音
+      </label>
+    </div>
+
+    <!-- 狀態顯示 -->
+    <div class="status-bar">
+      <span id="loadStatus">正在連線至 Oxford 雲端詞庫...</span>
+      <span id="poolStatus"></span>
+    </div>
+
+    <!-- 主卡片 -->
+    <div class="card" id="card">
+      <div class="word-header">
+        <h1 class="word-title" id="wordText">---</h1>
+        <span class="pos-tag" id="posText"></span>
+      </div>
+
+      <!-- 發音按鈕 -->
+      <div class="pron-bar">
+        <div class="pron-group">
+          <span class="pron-region">UK</span>
+          <button class="audio-btn" id="ukAudioBtn" title="英國發音 (按 1 發音)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+          </button>
+          <span class="ipa" id="ukIpa"></span>
+        </div>
+
+        <div class="pron-group">
+          <span class="pron-region">US</span>
+          <button class="audio-btn" id="usAudioBtn" title="美國發音 (按 2 發音)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+          </button>
+          <span class="ipa" id="usIpa"></span>
+        </div>
+      </div>
+
+      <!-- CEFR 與 釋義 -->
+      <div id="cefrBadge" class="cefr-badge b2">B2</div>
+      <div class="definition" id="definitionText">---</div>
+
+      <!-- 例句區塊 -->
+      <div class="examples-box">
+        <div class="examples-title">Example</div>
+        <div id="examplesContainer">---</div>
+      </div>
+    </div>
+
+    <!-- 底部導覽 -->
+    <div class="controls">
+      <span class="counter" id="counterText">0 / 0</span>
+      <div class="nav-group">
+        <button id="prevBtn">← 上一個 (←)</button>
+        <button id="nextBtn" class="primary-btn">下一個 (→)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 遠端開源 Oxford 5000 JSON 來源 (GitHub Raw)
+    const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
+
+    // 內建離線/備用種子詞庫（確保即使離線亦能立即運作）
+    const fallbackWords = [
+      {
+        word: "violent",
+        pos: "adjective",
+        level: "B2",
+        ipa: "/ˈvaɪələnt/",
+        definition: "involving violence; using or showing great physical force:",
+        examples: ["a victim of violent crime", "a violent protest", "I don't like violent films (= films that show violence)."]
+      },
+      {
+        word: "abandon",
+        pos: "verb",
+        level: "B2",
+        ipa: "/əˈbændən/",
+        definition: "to leave a place, thing, or person, usually for ever:",
+        examples: ["We had to abandon the car in the snow.", "They abandoned their attempt to climb the mountain."]
+      },
+      {
+        word: "capable",
+        pos: "adjective",
+        level: "B2",
+        ipa: "/ˈkeɪpəbl/",
+        definition: "having the ability, power, or qualities to be able to do something:",
+        examples: ["You are capable of better work than this.", "a very capable teacher"]
+      }
+    ];
+
+    let fullDataset = [];
+    let filteredDataset = [];
+    let currentIndex = 0;
+
+    // 解析資料格式（相容多種開源 schema）
+    function normalizeItem(raw) {
+      const word = raw.Spelling || raw.spelling || raw.word || raw.headword || "";
+      const pos = raw.pos || raw["word type"] || raw.type || "";
+      const level = raw.cefr || raw.CEFR || raw.level || "B2";
+      const ipa = raw["Lexical spelling"] || raw.ipa || raw.pronunciation || "";
+      const def = raw.Meaning || raw.meaning || raw.definition || raw.def || "No definition available.";
+      
+      let ex = raw.Example || raw.example || raw.examples || [];
+      if (typeof ex === 'string') ex = ex ? [ex] : [];
+      if (!Array.isArray(ex) || ex.length === 0) ex = ["(No example sentence provided)"];
+
+      return {
+        word: word.trim(),
+        pos: pos.trim(),
+        level: level.trim().toUpperCase(),
+        ipa: ipa.trim(),
+        definition: def.trim(),
+        examples: ex
+      };
+    }
+
+    // 載入遠端資料庫
+    async function initVocabulary() {
+      const loadStatus = document.getElementById("loadStatus");
+      try {
+        loadStatus.textContent = "正在載入 Oxford 5000 詞庫 (約 3MB)...";
+        const res = await fetch(OXFORD_5000_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const rawData = await res.json();
+        const rawList = Array.isArray(rawData) ? rawData : Object.values(rawData);
+        
+        fullDataset = rawList.map(normalizeItem).filter(w => w.word.length > 0);
+        loadStatus.textContent = `成功載入 Oxford 完整詞庫 (${fullDataset.length} 字)`;
+      } catch (err) {
+        console.warn("載入遠端失敗，使用離線備援庫:", err);
+        fullDataset = fallbackWords;
+        loadStatus.textContent = "已啟用內建 Oxford 離線備援庫";
+      }
+
+      applyFilters();
+    }
+
+    // 篩選難度
+    function applyFilters() {
+      const selectedLevel = document.getElementById("cefrFilter").value;
+      if (selectedLevel === "ALL") {
+        filteredDataset = [...fullDataset];
+      } else {
+        filteredDataset = fullDataset.filter(item => item.level.includes(selectedLevel));
+      }
+
+      document.getElementById("poolStatus").textContent = `目前清單: ${filteredDataset.length} 個字`;
+      currentIndex = 0;
+      if (filteredDataset.length > 0) {
+        renderCard(filteredDataset[0]);
+      }
+    }
+
+    // 渲染卡片
+    function renderCard(item) {
+      if (!item) return;
+
+      document.getElementById("wordText").textContent = item.word;
+      document.getElementById("posText").textContent = item.pos;
+      document.getElementById("ukIpa").textContent = item.ipa;
+      document.getElementById("usIpa").textContent = item.ipa;
+
+      const badge = document.getElementById("cefrBadge");
+      badge.textContent = item.level;
+      badge.className = `cefr-badge ${item.level.toLowerCase()}`;
+
+      document.getElementById("definitionText").textContent = item.definition;
+
+      const container = document.getElementById("examplesContainer");
+      container.innerHTML = item.examples.map(ex => `<div class="example-item">• ${ex}</div>`).join("");
+
+      document.getElementById("counterText").textContent = `${currentIndex + 1} / ${filteredDataset.length}`;
+      document.getElementById("prevBtn").disabled = currentIndex === 0;
+      document.getElementById("nextBtn").disabled = currentIndex === filteredDataset.length - 1;
+
+      // 若啟用了切換時自動發音
+      if (document.getElementById("autoPronounce").checked) {
+        speak(item.word, "en-GB");
+      }
+    }
+
+    // 朗讀語音 (Web Speech API)
+    function speak(text, lang = "en-GB") {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang; // en-GB 或 en-US
+      utterance.rate = 0.85; // 稍慢語速便於學習
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // 事件監聽
+    document.getElementById("ukAudioBtn").addEventListener("click", () => {
+      speak(filteredDataset[currentIndex].word, "en-GB");
+    });
+
+    document.getElementById("usAudioBtn").addEventListener("click", () => {
+      speak(filteredDataset[currentIndex].word, "en-US");
+    });
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCard(filteredDataset[currentIndex]);
+      }
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (currentIndex < filteredDataset.length - 1) {
+        currentIndex++;
+        renderCard(filteredDataset[currentIndex]);
+      }
+    });
+
+    document.getElementById("randomBtn").addEventListener("click", () => {
+      if (filteredDataset.length === 0) return;
+      currentIndex = Math.floor(Math.random() * filteredDataset.length);
+      renderCard(filteredDataset[currentIndex]);
+    });
+
+    document.getElementById("cefrFilter").addEventListener("change", applyFilters);
+
+    // 搜尋功能
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) return;
+      const foundIdx = filteredDataset.findIndex(item => item.word.toLowerCase() === q || item.word.toLowerCase().startsWith(q));
+      if (foundIdx !== -1) {
+        currentIndex = foundIdx;
+        renderCard(filteredDataset[currentIndex]);
+      }
+    });
+
+    // 鍵盤操作捷徑
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.key === "ArrowLeft" && currentIndex > 0) {
+        currentIndex--;
+        renderCard(filteredDataset[currentIndex]);
+      } else if (e.key === "ArrowRight" && currentIndex < filteredDataset.length - 1) {
+        currentIndex++;
+        renderCard(filteredDataset[currentIndex]);
+      } else if (e.key === " " || e.key === "1") {
+        e.preventDefault();
+        speak(filteredDataset[currentIndex].word, "en-GB");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        speak(filteredDataset[currentIndex].word, "en-US");
+      }
+    });
+
+    // 啟動載入
+    initVocabulary();
+  </script>
+</body>
+</html>
