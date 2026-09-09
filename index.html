@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oxford 3000 / 5000 Vocab Learner</title>
+  <title>Vocab Learner - Oxford & Cambridge (A1-C2)</title>
   <style>
     :root {
-      --primary: #002147;       /* Oxford Blue */
-      --accent-blue: #0056b3;
-      --accent-yellow: #ffbf00;
-      --bg: #f1f5f9;
+      --primary: #002147;       /* Oxford Deep Blue */
+      --accent-blue: #0284c7;
+      --accent-yellow: #f59e0b;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
-      --border: #cbd5e1;
+      --border: #e2e8f0;
     }
 
     * {
@@ -30,7 +30,7 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
     }
 
     .container {
@@ -38,72 +38,131 @@
       max-width: 720px;
     }
 
-    /* 頂部工具列 */
-    .toolbar {
+    /* 頂部搜尋與功能切換列 */
+    .header-bar {
       display: flex;
-      flex-wrap: wrap;
       gap: 0.5rem;
-      margin-bottom: 1rem;
-      align-items: center;
+      margin-bottom: 0.75rem;
     }
 
     .search-input {
       flex: 1;
-      min-width: 200px;
       padding: 0.65rem 0.9rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.95rem;
       outline: none;
+      background: #fff;
     }
 
-    select, button {
-      padding: 0.65rem 0.9rem;
+    .btn {
+      padding: 0.65rem 1rem;
       border: 1px solid var(--border);
       border-radius: 8px;
       font-size: 0.9rem;
       background: #fff;
       cursor: pointer;
+      font-weight: 500;
       transition: all 0.2s;
     }
 
-    button.primary-btn {
+    .btn-primary {
       background: var(--primary);
       color: #fff;
       border-color: var(--primary);
-      font-weight: 500;
     }
 
-    button.primary-btn:hover {
-      background: var(--accent-blue);
+    .btn-primary:hover {
+      background: #0f3460;
     }
 
-    .toggle-label {
+    /* 多選難度按鈕組 */
+    .filter-section {
+      background: #fff;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .filter-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 0.25rem;
+    }
+
+    .level-pill {
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .level-pill:hover {
+      background: #e2e8f0;
+    }
+
+    .level-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .level-pill.c2.active {
+      background: #6b21a8; /* C2 專用紫金高貴配色 */
+      border-color: #6b21a8;
+    }
+
+    .pref-row {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--border);
+      padding-top: 0.5rem;
+    }
+
+    .toggle-item {
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
       cursor: pointer;
-      user-select: none;
     }
 
-    /* 載入狀態條 */
+    /* 狀態顯示 */
     .status-bar {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+      padding: 0 0.2rem;
     }
 
-    /* 單字卡片 */
+    /* 單字主卡片 */
     .card {
       background: var(--card-bg);
       border-radius: 14px;
-      padding: 2.25rem;
-      box-shadow: 0 4px 20px rgba(0, 33, 71, 0.08);
+      padding: 2rem 2.25rem;
+      box-shadow: 0 4px 20px rgba(0, 33, 71, 0.07);
       border: 1px solid var(--border);
       min-height: 380px;
       display: flex;
@@ -113,8 +172,9 @@
     .word-header {
       display: flex;
       align-items: baseline;
+      flex-wrap: wrap;
       gap: 0.75rem;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
     }
 
     .word-title {
@@ -130,12 +190,20 @@
       font-size: 1.1rem;
     }
 
-    /* 音標與發音列 */
+    /* 中文翻譯標籤 */
+    .zh-word-translation {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #047857; /* 醒目森綠色 */
+      margin-bottom: 0.5rem;
+    }
+
+    /* 發音區 */
     .pron-bar {
       display: flex;
       align-items: center;
       gap: 1.25rem;
-      margin: 0.8rem 0 1.25rem 0;
+      margin: 0.6rem 0 1.2rem 0;
       padding-bottom: 1rem;
       border-bottom: 2px solid var(--accent-yellow);
     }
@@ -154,7 +222,7 @@
 
     .ipa {
       font-family: "Lucida Sans Unicode", "DejaVu Sans", Arial, sans-serif;
-      font-size: 1.05rem;
+      font-size: 1rem;
     }
 
     .audio-btn {
@@ -176,7 +244,7 @@
       background: #dbeafe;
     }
 
-    /* CEFR 等級標籤 */
+    /* CEFR 等級徽章 */
     .cefr-badge {
       display: inline-block;
       padding: 0.2rem 0.55rem;
@@ -184,23 +252,34 @@
       font-size: 0.8rem;
       font-weight: 700;
       margin-bottom: 0.75rem;
-      background: #e0f2fe;
-      color: #0369a1;
       width: fit-content;
     }
 
-    .cefr-badge.c1, .cefr-badge.c2 { background: #fae8ff; color: #86198f; }
-    .cefr-badge.b1, .cefr-badge.b2 { background: #e0f2fe; color: #0369a1; }
-    .cefr-badge.a1, .cefr-badge.a2 { background: #dcfce7; color: #15803d; }
+    .cefr-badge.c2 { background: #fae8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .cefr-badge.c1 { background: #f3e8ff; color: #7e22ce; }
+    .cefr-badge.b2, .cefr-badge.b1 { background: #e0f2fe; color: #0369a1; }
+    .cefr-badge.a2, .cefr-badge.a1 { background: #dcfce7; color: #15803d; }
 
-    .definition {
-      font-size: 1.2rem;
-      font-weight: 600;
-      line-height: 1.45;
-      color: #1e293b;
+    /* 釋義與中文 */
+    .def-container {
       margin-bottom: 1.25rem;
     }
 
+    .definition-en {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: #1e293b;
+      margin-bottom: 0.35rem;
+    }
+
+    .definition-zh {
+      font-size: 1rem;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    /* 例句 */
     .examples-box {
       margin-top: auto;
       background: #f8fafc;
@@ -219,7 +298,7 @@
     }
 
     .example-item {
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       line-height: 1.5;
       color: #334155;
       margin-bottom: 0.4rem;
@@ -229,7 +308,7 @@
       margin-bottom: 0;
     }
 
-    /* 底部導覽列 */
+    /* 底部按鈕 */
     .controls {
       display: flex;
       justify-content: space-between;
@@ -251,41 +330,52 @@
 <body>
 
   <div class="container">
-    <!-- 頂部功能列 -->
-    <div class="toolbar">
-      <input type="text" id="searchInput" class="search-input" placeholder="搜尋或跳轉單字 (例: violent, abandon)..." />
-      
-      <!-- CEFR 難度過濾 -->
-      <select id="cefrFilter" title="按 CEFR 等級過濾">
-        <option value="ALL">全部難度</option>
-        <option value="A1">A1</option>
-        <option value="A2">A2</option>
-        <option value="B1">B1</option>
-        <option value="B2">B2</option>
-        <option value="C1">C1</option>
-      </select>
-
-      <button class="primary-btn" id="randomBtn">隨機抽字</button>
-
-      <label class="toggle-label">
-        <input type="checkbox" id="autoPronounce"> 切換時自動發音
-      </label>
+    <!-- 頂部搜尋與抽字 -->
+    <div class="header-bar">
+      <input type="text" id="searchInput" class="search-input" placeholder="搜尋單字 (例: violent, ubiquitous)..." />
+      <button class="btn btn-primary" id="randomBtn">隨機抽字</button>
     </div>
 
-    <!-- 狀態顯示 -->
+    <!-- 難度多選與偏好設定 -->
+    <div class="filter-section">
+      <div class="filter-row">
+        <span class="filter-label">難度多選：</span>
+        <div class="level-pill" data-level="ALL">全部 (All)</div>
+        <div class="level-pill" data-level="A1">A1</div>
+        <div class="level-pill" data-level="A2">A2</div>
+        <div class="level-pill" data-level="B1">B1</div>
+        <div class="level-pill" data-level="B2">B2</div>
+        <div class="level-pill" data-level="C1">C1</div>
+        <div class="level-pill c2" data-level="C2">C2 (Mastery/GRE)</div>
+      </div>
+
+      <div class="pref-row">
+        <label class="toggle-item">
+          <input type="checkbox" id="showZhToggle" checked> 顯示中文意思
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="autoPronounceToggle"> 切換時自動發音
+        </label>
+      </div>
+    </div>
+
+    <!-- 載入與詞庫狀態 -->
     <div class="status-bar">
-      <span id="loadStatus">正在連線至 Oxford 雲端詞庫...</span>
-      <span id="poolStatus"></span>
+      <span id="loadStatus">正在載入詞庫...</span>
+      <span id="poolStatus">---</span>
     </div>
 
-    <!-- 主卡片 -->
-    <div class="card" id="card">
+    <!-- 單字卡片主體 -->
+    <div class="card">
       <div class="word-header">
         <h1 class="word-title" id="wordText">---</h1>
         <span class="pos-tag" id="posText"></span>
       </div>
 
-      <!-- 發音按鈕 -->
+      <!-- 中文單字直譯 -->
+      <div class="zh-word-translation" id="zhWordText">---</div>
+
+      <!-- 音標與發音按鈕 -->
       <div class="pron-bar">
         <div class="pron-group">
           <span class="pron-region">UK</span>
@@ -308,13 +398,18 @@
         </div>
       </div>
 
-      <!-- CEFR 與 釋義 -->
+      <!-- CEFR 標籤 -->
       <div id="cefrBadge" class="cefr-badge b2">B2</div>
-      <div class="definition" id="definitionText">---</div>
 
-      <!-- 例句區塊 -->
+      <!-- 英文與中文釋義 -->
+      <div class="def-container">
+        <div class="definition-en" id="defEnText">---</div>
+        <div class="definition-zh" id="defZhText">---</div>
+      </div>
+
+      <!-- 例句 -->
       <div class="examples-box">
-        <div class="examples-title">Example</div>
+        <div class="examples-title">Examples</div>
         <div id="examplesContainer">---</div>
       </div>
     </div>
@@ -323,53 +418,199 @@
     <div class="controls">
       <span class="counter" id="counterText">0 / 0</span>
       <div class="nav-group">
-        <button id="prevBtn">← 上一個 (←)</button>
-        <button id="nextBtn" class="primary-btn">下一個 (→)</button>
+        <button class="btn" id="prevBtn">← 上一個 (←)</button>
+        <button class="btn btn-primary" id="nextBtn">下一個 (→)</button>
       </div>
     </div>
   </div>
 
   <script>
-    // 遠端開源 Oxford 5000 JSON 來源 (GitHub Raw)
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
+    const PREF_KEY = "vocab_app_preferences_v2";
 
-    // 內建離線/備用種子詞庫（確保即使離線亦能立即運作）
+    // 專屬補齊：Cambridge / GRE / AWL 精選 C2 精通級生字庫
+    const c2WordList = [
+      {
+        word: "ubiquitous",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/juːˈbɪk.wə.təs/",
+        zh: "無處不在的；普遍存在的",
+        definition: "seeming to be in all places at the same time:",
+        zhDef: "似乎無所不在的；十分普遍的",
+        examples: ["Smartphones have become ubiquitous in daily life.", "his ubiquitous influence on modern art"]
+      },
+      {
+        word: "ephemeral",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/ɪˈfem.ər.əl/",
+        zh: "短暫的；轉瞬即逝的",
+        definition: "lasting for only a short time:",
+        zhDef: "僅持續很短時間的；生命短暫的",
+        examples: ["Fame in the internet age is often ephemeral.", "ephemeral pleasures"]
+      },
+      {
+        word: "preposterous",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/prɪˈpɒs.tər.əs/",
+        zh: "荒謬的；反常的",
+        definition: "very silly or stupid; completely unreasonable:",
+        zhDef: "荒唐的；極其荒謬無稽的",
+        examples: ["The very idea is preposterous!", "It's preposterous to blame him for everything."]
+      },
+      {
+        word: "anecdotal",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/ˌæn.ɪkˈdəʊ.təl/",
+        zh: "軼事的；道聽途說的",
+        definition: "based on personal stories rather than facts or research:",
+        zhDef: "基於個人傳聞而非科學依據的",
+        examples: ["Anecdotal evidence suggests that the drug is effective.", "These are just anecdotal reports."]
+      },
+      {
+        word: "capricious",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/kəˈprɪʃ.əs/",
+        zh: "反覆無常的；善變的",
+        definition: "changing mood or behaviour suddenly and unexpectedly:",
+        zhDef: "脾氣或行為變化莫測的",
+        examples: ["a capricious climate with sudden storms", "the capricious nature of the stock market"]
+      },
+      {
+        word: "taciturn",
+        pos: "adjective",
+        level: "C2",
+        ipa: "/ˈtæs.ɪ.tɜːn/",
+        zh: "沉默寡言的；不苟言語的",
+        definition: "tending not to speak much; reserved in speech:",
+        zhDef: "不愛說話的；安靜冷淡的",
+        examples: ["He was a taciturn man who rarely shared his thoughts.", "a strangely taciturn youth"]
+      },
+      {
+        word: "serendipity",
+        pos: "noun",
+        level: "C2",
+        ipa: "/ˌser.ənˈdɪp.ə.ti/",
+        zh: "意外收穫；機緣巧合",
+        definition: "the fact of finding interesting or valuable things by chance:",
+        zhDef: "偶然發現有趣或珍貴事物的好運氣",
+        examples: ["Finding this café was pure serendipity.", "scientific breakthroughs born of serendipity"]
+      }
+    ];
+
+    // 本地離線備援種子庫
     const fallbackWords = [
       {
         word: "violent",
         pos: "adjective",
         level: "B2",
         ipa: "/ˈvaɪələnt/",
+        zh: "暴力的；猛烈的；狂暴的",
         definition: "involving violence; using or showing great physical force:",
+        zhDef: "涉及暴力的；強烈狂暴的",
         examples: ["a victim of violent crime", "a violent protest", "I don't like violent films (= films that show violence)."]
       },
       {
-        word: "abandon",
-        pos: "verb",
-        level: "B2",
-        ipa: "/əˈbændən/",
-        definition: "to leave a place, thing, or person, usually for ever:",
-        examples: ["We had to abandon the car in the snow.", "They abandoned their attempt to climb the mountain."]
+        word: "attractive",
+        pos: "adjective",
+        level: "A2",
+        ipa: "/əˈtræk.tɪv/",
+        zh: "有吸引力的；動人的",
+        definition: "pleasant to look at, or causing interest or pleasure:",
+        zhDef: "悅目的；引起興趣的",
+        examples: ["an attractive woman/man", "The offer is very attractive."]
       },
       {
-        word: "capable",
+        word: "slender",
         pos: "adjective",
-        level: "B2",
-        ipa: "/ˈkeɪpəbl/",
-        definition: "having the ability, power, or qualities to be able to do something:",
-        examples: ["You are capable of better work than this.", "a very capable teacher"]
+        level: "C1",
+        ipa: "/ˈslen.dər/",
+        zh: "纖細的；修長的；苗條的",
+        definition: "thin and delicate, often in a way that is attractive:",
+        zhDef: "修長苗條的；清秀纖弱的",
+        examples: ["She had a slender figure and long legs.", "He had slender hands."]
       }
     ];
 
+    // 全域狀態
     let fullDataset = [];
     let filteredDataset = [];
     let currentIndex = 0;
+    const translationCache = {};
 
-    // 解析資料格式（相容多種開源 schema）
+    // 使用者偏好設定
+    let userPrefs = {
+      selectedLevels: ["ALL"], // 預設全部
+      showZh: true,
+      autoPronounce: false,
+      lastWord: ""
+    };
+
+    // 讀取偏好
+    function loadUserPreferences() {
+      try {
+        const saved = localStorage.getItem(PREF_KEY);
+        if (saved) {
+          userPrefs = Object.assign(userPrefs, JSON.parse(saved));
+        }
+      } catch (e) {
+        console.warn("無法讀取 LocalStorage:", e);
+      }
+
+      // 還原 checkbox 狀態
+      document.getElementById("showZhToggle").checked = userPrefs.showZh;
+      document.getElementById("autoPronounceToggle").checked = userPrefs.autoPronounce;
+
+      // 還原 Pill 標籤狀態
+      document.querySelectorAll(".level-pill").forEach(pill => {
+        const lvl = pill.dataset.level;
+        if (userPrefs.selectedLevels.includes(lvl)) {
+          pill.classList.add("active");
+        } else {
+          pill.classList.remove("active");
+        }
+      });
+    }
+
+    // 儲存偏好
+    function saveUserPreferences() {
+      try {
+        if (filteredDataset[currentIndex]) {
+          userPrefs.lastWord = filteredDataset[currentIndex].word;
+        }
+        userPrefs.showZh = document.getElementById("showZhToggle").checked;
+        userPrefs.autoPronounce = document.getElementById("autoPronounceToggle").checked;
+        localStorage.setItem(PREF_KEY, JSON.stringify(userPrefs));
+      } catch (e) {
+        console.warn("無法寫入 LocalStorage:", e);
+      }
+    }
+
+    // 免費即時繁體中文翻譯 (Google GTX)
+    async function translateToZh(text) {
+      if (!text) return "";
+      if (translationCache[text]) return translationCache[text];
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const translated = data[0].map(item => item[0]).join('');
+        translationCache[text] = translated;
+        return translated;
+      } catch (err) {
+        return "";
+      }
+    }
+
+    // 正規化單字資料
     function normalizeItem(raw) {
       const word = raw.Spelling || raw.spelling || raw.word || raw.headword || "";
       const pos = raw.pos || raw["word type"] || raw.type || "";
-      const level = raw.cefr || raw.CEFR || raw.level || "B2";
+      const level = (raw.cefr || raw.CEFR || raw.level || "B2").toUpperCase();
       const ipa = raw["Lexical spelling"] || raw.ipa || raw.pronunciation || "";
       const def = raw.Meaning || raw.meaning || raw.definition || raw.def || "No definition available.";
       
@@ -380,53 +621,70 @@
       return {
         word: word.trim(),
         pos: pos.trim(),
-        level: level.trim().toUpperCase(),
+        level: level.trim(),
         ipa: ipa.trim(),
         definition: def.trim(),
+        zh: raw.zh || "",
+        zhDef: raw.zhDef || "",
         examples: ex
       };
     }
 
-    // 載入遠端資料庫
+    // 載入詞庫
     async function initVocabulary() {
       const loadStatus = document.getElementById("loadStatus");
+      loadUserPreferences();
+
       try {
-        loadStatus.textContent = "正在載入 Oxford 5000 詞庫 (約 3MB)...";
+        loadStatus.textContent = "正在同步 Oxford 5000 + Cambridge C2 詞庫...";
         const res = await fetch(OXFORD_5000_URL);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         
         const rawData = await res.json();
         const rawList = Array.isArray(rawData) ? rawData : Object.values(rawData);
         
-        fullDataset = rawList.map(normalizeItem).filter(w => w.word.length > 0);
-        loadStatus.textContent = `成功載入 Oxford 完整詞庫 (${fullDataset.length} 字)`;
+        // 結合 Oxford 5000 與 C2 專屬庫
+        const oxfordWords = rawList.map(normalizeItem).filter(w => w.word.length > 0);
+        fullDataset = [...c2WordList, ...oxfordWords];
+        loadStatus.textContent = `成功載入全量詞庫 (共 ${fullDataset.length} 字，含 A1-C2)`;
       } catch (err) {
         console.warn("載入遠端失敗，使用離線備援庫:", err);
-        fullDataset = fallbackWords;
-        loadStatus.textContent = "已啟用內建 Oxford 離線備援庫";
+        fullDataset = [...c2WordList, ...fallbackWords];
+        loadStatus.textContent = `已啟用離線備援詞庫 (${fullDataset.length} 字)`;
       }
 
-      applyFilters();
+      applyFilters(true);
     }
 
-    // 篩選難度
-    function applyFilters() {
-      const selectedLevel = document.getElementById("cefrFilter").value;
-      if (selectedLevel === "ALL") {
+    // 多選過濾邏輯
+    function applyFilters(isFirstLoad = false) {
+      const activeLevels = userPrefs.selectedLevels;
+
+      if (activeLevels.includes("ALL") || activeLevels.length === 0) {
         filteredDataset = [...fullDataset];
       } else {
-        filteredDataset = fullDataset.filter(item => item.level.includes(selectedLevel));
+        filteredDataset = fullDataset.filter(item => {
+          return activeLevels.some(lvl => item.level.includes(lvl));
+        });
       }
 
       document.getElementById("poolStatus").textContent = `目前清單: ${filteredDataset.length} 個字`;
-      currentIndex = 0;
+
+      // 嘗試定位回使用者上次看的單字
+      if (isFirstLoad && userPrefs.lastWord) {
+        const found = filteredDataset.findIndex(item => item.word.toLowerCase() === userPrefs.lastWord.toLowerCase());
+        currentIndex = found !== -1 ? found : 0;
+      } else {
+        currentIndex = 0;
+      }
+
       if (filteredDataset.length > 0) {
-        renderCard(filteredDataset[0]);
+        renderCard(filteredDataset[currentIndex]);
       }
     }
 
     // 渲染卡片
-    function renderCard(item) {
+    async function renderCard(item) {
       if (!item) return;
 
       document.getElementById("wordText").textContent = item.word;
@@ -438,7 +696,7 @@
       badge.textContent = item.level;
       badge.className = `cefr-badge ${item.level.toLowerCase()}`;
 
-      document.getElementById("definitionText").textContent = item.definition;
+      document.getElementById("defEnText").textContent = item.definition;
 
       const container = document.getElementById("examplesContainer");
       container.innerHTML = item.examples.map(ex => `<div class="example-item">• ${ex}</div>`).join("");
@@ -447,23 +705,108 @@
       document.getElementById("prevBtn").disabled = currentIndex === 0;
       document.getElementById("nextBtn").disabled = currentIndex === filteredDataset.length - 1;
 
-      // 若啟用了切換時自動發音
-      if (document.getElementById("autoPronounce").checked) {
+      // 處理中文意思顯示
+      updateChineseTranslations(item);
+
+      // 自動發音
+      if (document.getElementById("autoPronounceToggle").checked) {
         speak(item.word, "en-GB");
+      }
+
+      saveUserPreferences();
+    }
+
+    // 非同步載入與更新中文意思
+    async function updateChineseTranslations(item) {
+      const showZh = document.getElementById("showZhToggle").checked;
+      const zhWordEl = document.getElementById("zhWordText");
+      const defZhEl = document.getElementById("defZhText");
+
+      if (!showZh) {
+        zhWordEl.style.display = "none";
+        defZhEl.style.display = "none";
+        return;
+      }
+
+      zhWordEl.style.display = "block";
+      defZhEl.style.display = "block";
+
+      // 優先使用已存在的中文，否則即時翻譯
+      if (item.zh) {
+        zhWordEl.textContent = `【中文】${item.zh}`;
+      } else {
+        zhWordEl.textContent = "【中文】查詢中...";
+        translateToZh(item.word).then(trans => {
+          item.zh = trans;
+          zhWordEl.textContent = trans ? `【中文】${trans}` : "";
+        });
+      }
+
+      if (item.zhDef) {
+        defZhEl.textContent = item.zhDef;
+      } else {
+        translateToZh(item.definition).then(trans => {
+          item.zhDef = trans;
+          defZhEl.textContent = trans;
+        });
       }
     }
 
-    // 朗讀語音 (Web Speech API)
+    // 發音功能
     function speak(text, lang = "en-GB") {
       if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang; // en-GB 或 en-US
-      utterance.rate = 0.85; // 稍慢語速便於學習
+      utterance.lang = lang;
+      utterance.rate = 0.85;
       window.speechSynthesis.speak(utterance);
     }
 
-    // 事件監聽
+    // 難度 Pill 點擊多選處理
+    document.querySelectorAll(".level-pill").forEach(pill => {
+      pill.addEventListener("click", () => {
+        const level = pill.dataset.level;
+
+        if (level === "ALL") {
+          userPrefs.selectedLevels = ["ALL"];
+          document.querySelectorAll(".level-pill").forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+        } else {
+          // 移除 ALL
+          userPrefs.selectedLevels = userPrefs.selectedLevels.filter(l => l !== "ALL");
+          document.querySelector('.level-pill[data-level="ALL"]').classList.remove("active");
+
+          if (userPrefs.selectedLevels.includes(level)) {
+            userPrefs.selectedLevels = userPrefs.selectedLevels.filter(l => l !== level);
+            pill.classList.remove("active");
+          } else {
+            userPrefs.selectedLevels.push(level);
+            pill.classList.add("active");
+          }
+
+          // 若全沒選，自動選回 ALL
+          if (userPrefs.selectedLevels.length === 0) {
+            userPrefs.selectedLevels = ["ALL"];
+            document.querySelector('.level-pill[data-level="ALL"]').classList.add("active");
+          }
+        }
+
+        saveUserPreferences();
+        applyFilters();
+      });
+    });
+
+    // 偏好切換
+    document.getElementById("showZhToggle").addEventListener("change", () => {
+      if (filteredDataset[currentIndex]) {
+        updateChineseTranslations(filteredDataset[currentIndex]);
+      }
+      saveUserPreferences();
+    });
+
+    document.getElementById("autoPronounceToggle").addEventListener("change", saveUserPreferences);
+
+    // 發音按鈕
     document.getElementById("ukAudioBtn").addEventListener("click", () => {
       speak(filteredDataset[currentIndex].word, "en-GB");
     });
@@ -472,6 +815,7 @@
       speak(filteredDataset[currentIndex].word, "en-US");
     });
 
+    // 導覽按鈕
     document.getElementById("prevBtn").addEventListener("click", () => {
       if (currentIndex > 0) {
         currentIndex--;
@@ -492,8 +836,6 @@
       renderCard(filteredDataset[currentIndex]);
     });
 
-    document.getElementById("cefrFilter").addEventListener("change", applyFilters);
-
     // 搜尋功能
     document.getElementById("searchInput").addEventListener("input", (e) => {
       const q = e.target.value.trim().toLowerCase();
@@ -505,9 +847,9 @@
       }
     });
 
-    // 鍵盤操作捷徑
+    // 鍵盤捷徑 (←/→ 切換, 1/空白 UK音, 2 US音)
     window.addEventListener("keydown", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (e.target.tagName === "INPUT") return;
       if (e.key === "ArrowLeft" && currentIndex > 0) {
         currentIndex--;
         renderCard(filteredDataset[currentIndex]);
@@ -523,7 +865,7 @@
       }
     });
 
-    // 啟動載入
+    // 啟動
     initVocabulary();
   </script>
 </body>
