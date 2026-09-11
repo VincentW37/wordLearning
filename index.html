@@ -609,7 +609,7 @@
         </div>
       </div>
 
-      <!-- 模式二：QUIZ MODE (徹底修復 undefined) -->
+      <!-- 模式二：QUIZ MODE -->
       <div class="quiz-body" id="quizView">
         <div class="quiz-title-row">
           <span>🎯 請選出正確的中英文解釋：</span>
@@ -640,7 +640,7 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v10";
+    const PREF_KEY = "vocab_app_prefs_v11";
 
     const c2WordList = [
       { word: "ubiquitous", pos: "adjective", level: "C2", ipa: "/juːˈbɪk.wə.təs/", zh: "無處不在的", definition: "seeming to be in all places at the same time", zhDef: "似乎無所不在的；十分普遍的", examples: ["Smartphones have become ubiquitous in daily life."] },
@@ -804,20 +804,31 @@
         `詞庫總數：${fullDataset.length.toLocaleString()} 字（符合：${filteredDataset.length.toLocaleString()}）`;
     }
 
+    // 核心修正：無論係學習模式定係 QUIZ MODE，抽中的生字一律寫入歷史隊列 (historyQueue)！
     function drawRandomNextWord() {
       if (filteredDataset.length === 0) return;
 
       const randomIdx = Math.floor(Math.random() * filteredDataset.length);
       const chosenWord = filteredDataset.at(randomIdx);
 
+      // 統一歷程推入邏輯
+      if (historyPointer < historyQueue.length - 1) {
+        historyQueue = historyQueue.slice(0, historyPointer + 1);
+      }
+      historyQueue.push(chosenWord);
+      historyPointer = historyQueue.length - 1;
+
+      // 同步預先加載該詞的中文，保證歷史記錄中有中文顯示
+      if (!chosenWord.zh) {
+        translateText(chosenWord.word).then(trans => {
+          chosenWord.zh = trans;
+        });
+      }
+
       if (isQuizMode) {
         generateQuiz(chosenWord);
+        document.getElementById("historyIndicator").textContent = `${historyPointer + 1} / ${historyQueue.length}`;
       } else {
-        if (historyPointer < historyQueue.length - 1) {
-          historyQueue = historyQueue.slice(0, historyPointer + 1);
-        }
-        historyQueue.push(chosenWord);
-        historyPointer = historyQueue.length - 1;
         renderCard(chosenWord);
       }
     }
@@ -857,7 +868,7 @@
       }
     }
 
-    // 核心修復：使用解構賦值，絕無 被消除的風險！
+    // 產生測驗題目 (已徹底免疫 undefined)
     async function generateQuiz(targetWord) {
       currentQuizItem = targetWord;
       quizAnswered = false;
@@ -884,10 +895,9 @@
         }
       }
 
-      // 核心修正：使用 ES6 解構賦值（避開容易被後台過濾規則誤殺的 語法）
+      // 使用 ES6 解構賦值，安全取值
       const [distractorA, distractorB] = distractors;
 
-      // 防呆保護：若極端情況缺失，自動使用備用單字
       const safeDistA = distractorA && distractorA.definition ? distractorA : fallbackWords.at(0);
       const safeDistB = distractorB && distractorB.definition ? distractorB : fallbackWords.at(1);
 
@@ -1112,6 +1122,7 @@
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
     document.getElementById("prevBtn").addEventListener("click", goBackHistory);
 
+    // 歷史記錄彈窗：無論測驗定學習模式，均完整顯示最近 10 個做過的題目
     const historyModal = document.getElementById("historyModal");
     const historyBtn = document.getElementById("historyBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
@@ -1135,6 +1146,7 @@
             <span style="font-size:0.85rem;color:#047857;font-weight:600;">${item.zh || "查看"}</span>
           `;
           div.addEventListener("click", () => {
+            // 點擊歷史題目時，切換回學習模式展示該題詳情
             if (isQuizMode) document.getElementById("toggleQuizBtn").click();
             const targetIdx = historyQueue.lastIndexOf(item);
             if (targetIdx !== -1) {
