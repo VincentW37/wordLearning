@@ -12,7 +12,7 @@
       --accent-green-bg: #ecfdf5;
       --accent-green-border: #a7f3d0;
       --accent-purple: #7c3aed;
-      --accent-yellow: #f59e0b;
+      --accent-gold: #f59e0b;
       --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
@@ -126,27 +126,33 @@
       user-select: none;
     }
 
-    /* ⭐ 錯題本按鈕 */
+    /* 頂部錯題本按鈕 */
     .mistake-btn {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      padding: 0.25rem 0.65rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 0.22rem 0.65rem;
       border-radius: 6px;
       font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
-      color: #b45309;
+      color: var(--text-muted);
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.35rem;
       transition: all 0.15s;
+    }
+
+    .mistake-btn.has-items {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #b45309;
     }
 
     .mistake-btn:hover {
       background: #fef3c7;
     }
 
-    /* 總數資訊列 */
+    /* 總數資訊 */
     .count-info {
       font-size: 0.78rem;
       font-weight: 600;
@@ -204,26 +210,24 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.55rem;
     }
 
-    /* 卡片上的 ⭐ 收藏切換圖示 */
-    .star-toggle-btn {
+    /* 卡片上的 ⭐ 收藏按鈕 (SVG 向量星) */
+    .star-btn {
       background: none;
       border: none;
-      font-size: 1.3rem;
       cursor: pointer;
-      line-height: 1;
-      color: #cbd5e1;
-      transition: transform 0.15s, color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      border-radius: 50%;
+      transition: transform 0.15s ease;
     }
 
-    .star-toggle-btn.starred {
-      color: #f59e0b;
-    }
-
-    .star-toggle-btn:hover {
-      transform: scale(1.15);
+    .star-btn:hover {
+      transform: scale(1.18);
     }
 
     .cefr-badge {
@@ -438,7 +442,7 @@
 
     .quiz-card.locked { cursor: default; }
 
-    /* 底部控制列（無歷史，純淨雙按鈕） */
+    /* 底部控制列 */
     .bottom-bar {
       display: flex;
       align-items: center;
@@ -583,8 +587,10 @@
             <input type="checkbox" id="autoPronounceToggle"> 自動發音
           </label>
         </div>
-        <!-- ⭐ 錯題本入口 -->
-        <button class="mistake-btn" id="openMistakeBtn">⭐ 錯題本 (<span id="mistakeCountBadge">0</span>)</button>
+        <!-- 頂部錯題本按鈕（含向量星圖示） -->
+        <button class="mistake-btn" id="openMistakeBtn">
+          <span id="topStarIcon"></span> 錯題本 (<span id="mistakeCountBadge">0</span>)
+        </button>
       </div>
     </div>
 
@@ -602,7 +608,8 @@
           <span class="pos-tag" id="posText"></span>
         </div>
         <div class="header-actions">
-          <button class="star-toggle-btn" id="cardStarBtn" title="加入/移出錯題本">⭐</button>
+          <!-- 核心：空心/實心切換按鈕 -->
+          <button class="star-btn" id="cardStarBtn" title="加入/移出錯題本"></button>
           <div id="cefrBadge" class="cefr-badge b2">B2</div>
         </div>
       </div>
@@ -653,14 +660,14 @@
       </div>
     </div>
 
-    <!-- 底部控制列（無歷史，純粹清爽的雙按鈕） -->
+    <!-- 底部控制列 -->
     <div class="bottom-bar">
       <button class="btn-action btn-quiz" id="toggleQuizBtn">🎮 QUIZ</button>
       <button class="btn-action btn-next" id="nextBtn">隨機下一個 🎲</button>
     </div>
   </div>
 
-  <!-- ⭐ 錯題本彈窗 -->
+  <!-- 錯題本彈窗 -->
   <div class="modal-overlay" id="mistakeModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -677,8 +684,21 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v12";
-    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v1";
+    const PREF_KEY = "vocab_app_prefs_v13";
+    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v2";
+
+    // 向量星圖示 SVG（空心 vs 實心填色）
+    const SVG_HOLLOW_STAR = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    `;
+
+    const SVG_FILLED_STAR = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    `;
 
     const c2WordList = [
       { word: "ubiquitous", pos: "adjective", level: "C2", ipa: "/juːˈbɪk.wə.təs/", zh: "無處不在的", definition: "seeming to be in all places at the same time", zhDef: "似乎無所不在的；十分普遍的", examples: ["Smartphones have become ubiquitous in daily life."] },
@@ -705,7 +725,6 @@
     let quizAnswered = false;
     let quizStats = { total: 0, correct: 0 };
 
-    // ⭐ 錯題本資料結構 (來自 LocalStorage)
     let mistakeBook = [];
 
     let userPrefs = {
@@ -714,13 +733,10 @@
       autoPronounce: false
     };
 
-    // 讀取 LocalStorage 中的錯題本
     function loadMistakeBook() {
       try {
         const saved = localStorage.getItem(MISTAKE_STORAGE_KEY);
-        if (saved) {
-          mistakeBook = JSON.parse(saved);
-        }
+        if (saved) mistakeBook = JSON.parse(saved);
       } catch (e) {
         mistakeBook = [];
       }
@@ -734,22 +750,49 @@
       updateMistakeBadge();
     }
 
+    // 核心：精準控制頂部與卡片星號（空心 vs 實心填色）
     function updateMistakeBadge() {
-      document.getElementById("mistakeCountBadge").textContent = mistakeBook.length;
+      const badge = document.getElementById("mistakeCountBadge");
+      const btn = document.getElementById("openMistakeBtn");
+      const topIcon = document.getElementById("topStarIcon");
+
+      badge.textContent = mistakeBook.length;
+
+      if (mistakeBook.length > 0) {
+        btn.classList.add("has-items");
+        topIcon.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        `;
+      } else {
+        btn.classList.remove("has-items");
+        topIcon.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        `;
+      }
+
       updateCardStarStatus();
     }
 
     function isCurrentWordInMistakes() {
-      if (!currentItem) return false;
+      if (!currentItem || !currentItem.word) return false;
       return mistakeBook.some(m => m.word.toLowerCase() === currentItem.word.toLowerCase());
     }
 
+    // 核心：卡片上的星星：未收藏時「空心」，收藏後「填色」！
     function updateCardStarStatus() {
       const starBtn = document.getElementById("cardStarBtn");
+      if (!starBtn) return;
+
       if (isCurrentWordInMistakes()) {
-        starBtn.classList.add("starred");
+        starBtn.innerHTML = SVG_FILLED_STAR;
+        starBtn.title = "已收藏 (點擊取消)";
       } else {
-        starBtn.classList.remove("starred");
+        starBtn.innerHTML = SVG_HOLLOW_STAR;
+        starBtn.title = "未收藏 (點擊加入錯題本)";
       }
     }
 
@@ -895,7 +938,6 @@
         `詞庫總數：${fullDataset.length.toLocaleString()} 字（符合：${filteredDataset.length.toLocaleString()}）`;
     }
 
-    // 隨機抽字
     function drawRandomNextWord() {
       if (filteredDataset.length === 0) return;
 
@@ -914,6 +956,7 @@
         renderCard(currentItem);
       }
 
+      // 每次抽出新單字時，立即更新星星為「空心」或「填色」
       updateCardStarStatus();
     }
 
@@ -941,7 +984,6 @@
       }
     }
 
-    // 產生測驗題目
     async function generateQuiz(targetWord) {
       quizAnswered = false;
 
@@ -1033,7 +1075,6 @@
       }
     }
 
-    // 答題反饋：答錯時自動收錄至 ⭐ 錯題本 (LocalStorage)
     function handleQuizSelection(selectedCard, isCorrect) {
       if (quizAnswered) return;
       quizAnswered = true;
@@ -1042,7 +1083,7 @@
       if (isCorrect) {
         quizStats.correct++;
       } else {
-        // 核心邏輯：答錯自動入錯題本！
+        // 答錯自動收錄至錯題本，星號即時填色亮起！
         addWordToMistakes(currentItem);
       }
 
@@ -1059,7 +1100,7 @@
       if (!isCorrect) selectedCard.classList.add("wrong");
     }
 
-    // 卡片手動收藏按鈕點擊
+    // 點擊卡片星號：手動切換空心與填色
     document.getElementById("cardStarBtn").addEventListener("click", () => {
       if (!currentItem) return;
       if (isCurrentWordInMistakes()) {
@@ -1069,7 +1110,7 @@
       }
     });
 
-    // 學習模式 vs QUIZ MODE 切換
+    // 模式切換
     document.getElementById("toggleQuizBtn").addEventListener("click", () => {
       isQuizMode = !isQuizMode;
 
@@ -1145,7 +1186,7 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // 難度 Pill 點擊
+    // 難度切換
     document.querySelectorAll(".level-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const level = pill.dataset.level;
@@ -1195,7 +1236,7 @@
 
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
 
-    // ⭐ 錯題本彈窗控制
+    // 錯題本彈窗
     const mistakeModal = document.getElementById("mistakeModal");
     const openMistakeBtn = document.getElementById("openMistakeBtn");
     const closeMistakeBtn = document.getElementById("closeMistakeBtn");
@@ -1206,7 +1247,7 @@
       mistakeListContainer.innerHTML = "";
 
       if (mistakeBook.length === 0) {
-        mistakeListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>目前錯題本空空如也 🎉<br><span style='font-size:0.8rem;'>做測驗答錯或點擊單字旁的 ⭐ 即可收錄</span></div>";
+        mistakeListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>目前錯題本空空如也 🎉<br><span style='font-size:0.8rem;'>做測驗答錯或點擊單字旁的星星即可收錄</span></div>";
         return;
       }
 
@@ -1223,7 +1264,6 @@
           <button class="delete-mistake-btn" title="移出錯題本">🗑️</button>
         `;
 
-        // 點擊項目：載入卡片重溫
         div.querySelector(".mistake-word-info").addEventListener("click", () => {
           if (isQuizMode) document.getElementById("toggleQuizBtn").click();
           currentItem = item;
@@ -1232,7 +1272,6 @@
           mistakeModal.classList.remove("open");
         });
 
-        // 點擊垃圾桶：移出錯題本
         div.querySelector(".delete-mistake-btn").addEventListener("click", (e) => {
           e.stopPropagation();
           removeWordFromMistakes(item.word);
@@ -1261,7 +1300,7 @@
       }
     });
 
-    // 鍵盤快速鍵 (→ 下一個 / 1 英音 / 2 美音)
+    // 鍵盤快速鍵
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT") return;
       if (e.key === "ArrowRight") {
