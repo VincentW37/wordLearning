@@ -126,7 +126,7 @@
       user-select: none;
     }
 
-    /* 頂部錯題本按鈕 */
+    /* 頂部「錯題本/收藏」按鈕 */
     .mistake-btn {
       background: #f8fafc;
       border: 1px solid var(--border);
@@ -139,6 +139,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      white-space: nowrap;
       transition: all 0.15s;
     }
 
@@ -213,7 +214,7 @@
       gap: 0.55rem;
     }
 
-    /* 卡片上的 ⭐ 收藏按鈕 (SVG 向量星) */
+    /* 卡片上的星星收藏按鈕 (SVG 向量星) */
     .star-btn {
       background: none;
       border: none;
@@ -485,7 +486,7 @@
 
     .btn-next:hover { background: #1e293b; }
 
-    /* 錯題本彈窗 */
+    /* 錯題本/收藏彈窗 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -587,9 +588,9 @@
             <input type="checkbox" id="autoPronounceToggle"> 自動發音
           </label>
         </div>
-        <!-- 頂部錯題本按鈕（含向量星圖示） -->
+        <!-- 頂部按鈕：更新為「錯題本/收藏」 -->
         <button class="mistake-btn" id="openMistakeBtn">
-          <span id="topStarIcon"></span> 錯題本 (<span id="mistakeCountBadge">0</span>)
+          <span id="topStarIcon"></span> 錯題本/收藏 (<span id="mistakeCountBadge">0</span>)
         </button>
       </div>
     </div>
@@ -608,8 +609,7 @@
           <span class="pos-tag" id="posText"></span>
         </div>
         <div class="header-actions">
-          <!-- 核心：空心/實心切換按鈕 -->
-          <button class="star-btn" id="cardStarBtn" title="加入/移出錯題本"></button>
+          <button class="star-btn" id="cardStarBtn" title="加入/移出錯題本/收藏"></button>
           <div id="cefrBadge" class="cefr-badge b2">B2</div>
         </div>
       </div>
@@ -667,11 +667,11 @@
     </div>
   </div>
 
-  <!-- 錯題本彈窗 -->
+  <!-- 錯題本/收藏彈窗 -->
   <div class="modal-overlay" id="mistakeModal">
     <div class="modal-card">
       <div class="modal-header">
-        <span>⭐ 我的錯題本 / 收藏夾</span>
+        <span>⭐ 錯題本 / 收藏</span>
         <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;" id="closeMistakeBtn">&times;</button>
       </div>
       <div class="modal-body" id="mistakeListContainer"></div>
@@ -684,8 +684,8 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v13";
-    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v2";
+    const PREF_KEY = "vocab_app_prefs_v14";
+    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v3";
 
     // 向量星圖示 SVG（空心 vs 實心填色）
     const SVG_HOLLOW_STAR = `
@@ -750,7 +750,7 @@
       updateMistakeBadge();
     }
 
-    // 核心：精準控制頂部與卡片星號（空心 vs 實心填色）
+    // 更新頂部「錯題本/收藏」按鈕狀態
     function updateMistakeBadge() {
       const badge = document.getElementById("mistakeCountBadge");
       const btn = document.getElementById("openMistakeBtn");
@@ -782,17 +782,16 @@
       return mistakeBook.some(m => m.word.toLowerCase() === currentItem.word.toLowerCase());
     }
 
-    // 核心：卡片上的星星：未收藏時「空心」，收藏後「填色」！
     function updateCardStarStatus() {
       const starBtn = document.getElementById("cardStarBtn");
       if (!starBtn) return;
 
       if (isCurrentWordInMistakes()) {
         starBtn.innerHTML = SVG_FILLED_STAR;
-        starBtn.title = "已收藏 (點擊取消)";
+        starBtn.title = "已加入錯題本/收藏 (點擊取消)";
       } else {
         starBtn.innerHTML = SVG_HOLLOW_STAR;
-        starBtn.title = "未收藏 (點擊加入錯題本)";
+        starBtn.title = "未收藏 (點擊加入錯題本/收藏)";
       }
     }
 
@@ -956,7 +955,6 @@
         renderCard(currentItem);
       }
 
-      // 每次抽出新單字時，立即更新星星為「空心」或「填色」
       updateCardStarStatus();
     }
 
@@ -1083,7 +1081,6 @@
       if (isCorrect) {
         quizStats.correct++;
       } else {
-        // 答錯自動收錄至錯題本，星號即時填色亮起！
         addWordToMistakes(currentItem);
       }
 
@@ -1100,7 +1097,6 @@
       if (!isCorrect) selectedCard.classList.add("wrong");
     }
 
-    // 點擊卡片星號：手動切換空心與填色
     document.getElementById("cardStarBtn").addEventListener("click", () => {
       if (!currentItem) return;
       if (isCurrentWordInMistakes()) {
@@ -1110,7 +1106,6 @@
       }
     });
 
-    // 模式切換
     document.getElementById("toggleQuizBtn").addEventListener("click", () => {
       isQuizMode = !isQuizMode;
 
@@ -1186,7 +1181,6 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // 難度切換
     document.querySelectorAll(".level-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const level = pill.dataset.level;
@@ -1236,7 +1230,7 @@
 
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
 
-    // 錯題本彈窗
+    // 錯題本/收藏彈窗
     const mistakeModal = document.getElementById("mistakeModal");
     const openMistakeBtn = document.getElementById("openMistakeBtn");
     const closeMistakeBtn = document.getElementById("closeMistakeBtn");
@@ -1247,7 +1241,7 @@
       mistakeListContainer.innerHTML = "";
 
       if (mistakeBook.length === 0) {
-        mistakeListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>目前錯題本空空如也 🎉<br><span style='font-size:0.8rem;'>做測驗答錯或點擊單字旁的星星即可收錄</span></div>";
+        mistakeListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>目前錯題本/收藏空空如也 🎉<br><span style='font-size:0.8rem;'>做測驗答錯或點擊單字旁的星星即可收錄</span></div>";
         return;
       }
 
@@ -1261,7 +1255,7 @@
             <span class="cefr-badge ${item.level.toLowerCase()}" style="padding:0.1rem 0.35rem;font-size:0.7rem;">${item.level}</span>
             <span style="font-size:0.85rem;color:#047857;font-weight:600;margin-left:4px;">${item.zh || ""}</span>
           </div>
-          <button class="delete-mistake-btn" title="移出錯題本">🗑️</button>
+          <button class="delete-mistake-btn" title="移出錯題本/收藏">🗑️</button>
         `;
 
         div.querySelector(".mistake-word-info").addEventListener("click", () => {
@@ -1293,7 +1287,7 @@
     });
 
     clearAllMistakesBtn.addEventListener("click", () => {
-      if (confirm("確定要清空所有錯題記錄嗎？")) {
+      if (confirm("確定要清空所有錯題/收藏記錄嗎？")) {
         mistakeBook = [];
         saveMistakeBook();
         renderMistakeModal();
