@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Vocab Learner - Oxford & Cambridge</title>
   <style>
     :root {
@@ -36,21 +36,25 @@
       color: var(--text);
     }
 
+    /* 核心修復：加入手機 Safe Area 與上下寬裕邊距，防止貼邊 */
     body {
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0.6rem;
+      padding-top: max(1.2rem, env(safe-area-inset-top));
+      padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+      padding-left: max(0.8rem, env(safe-area-inset-left));
+      padding-right: max(0.8rem, env(safe-area-inset-right));
     }
 
     .container {
       width: 100%;
-      max-width: 520px;
-      height: 98vh;
+      max-width: 500px;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 0.45rem;
+      gap: 0.55rem;
     }
 
     /* 頂部難度選擇 Panel */
@@ -64,6 +68,7 @@
       flex-direction: column;
       gap: 0.45rem;
       flex-shrink: 0;
+      margin-top: 0.2rem;
     }
 
     .pill-grid {
@@ -75,7 +80,7 @@
 
     .level-pill {
       text-align: center;
-      padding: 0.4rem 0;
+      padding: 0.42rem 0;
       border-radius: 20px;
       border: 1px solid var(--border);
       background: #f8fafc;
@@ -127,7 +132,6 @@
       font-size: 0.78rem;
     }
 
-    /* 右側按鈕群組：歷史 + 錯題本/收藏 */
     .top-actions-group {
       display: flex;
       align-items: center;
@@ -241,7 +245,6 @@
       gap: 0.55rem;
     }
 
-    /* 卡片上的星星收藏按鈕 (SVG 向量星) */
     .star-btn {
       background: none;
       border: none;
@@ -271,7 +274,6 @@
     .cefr-badge.b2, .cefr-badge.b1 { background: #e0f2fe; color: #0369a1; }
     .cefr-badge.a2, .cefr-badge.a1 { background: #dcfce7; color: #15803d; }
 
-    /* 中文核心意思膠囊 */
     .zh-badge {
       display: inline-flex;
       align-items: center;
@@ -286,7 +288,6 @@
       width: fit-content;
     }
 
-    /* 發音列 */
     .audio-strip {
       display: flex;
       align-items: center;
@@ -332,7 +333,6 @@
       color: #334155;
     }
 
-    /* 釋義區塊 */
     .def-block {
       display: flex;
       flex-direction: column;
@@ -353,7 +353,6 @@
       font-weight: 500;
     }
 
-    /* 例句區塊 */
     .example-wrap {
       background: #f8fafc;
       padding: 0.75rem 1rem;
@@ -470,17 +469,18 @@
 
     .quiz-card.locked { cursor: default; }
 
-    /* 底部控制列 */
+    /* 底部控制列：加入 margin-bottom 預留舒適點擊區域 */
     .bottom-bar {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       width: 100%;
       flex-shrink: 0;
+      margin-bottom: 0.4rem;
     }
 
     .btn-action {
-      height: 44px;
+      height: 46px;
       padding: 0 1.1rem;
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -499,7 +499,7 @@
       background: #7c3aed;
       color: #fff;
       border-color: #7c3aed;
-      min-width: 110px;
+      min-width: 105px;
     }
 
     .btn-quiz:hover { background: #6d28d9; }
@@ -513,7 +513,7 @@
 
     .btn-next:hover { background: #1e293b; }
 
-    /* 通用彈窗樣式 (歷史 / 錯題本共用) */
+    /* 通用彈窗樣式 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -616,7 +616,7 @@
           </label>
         </div>
 
-        <!-- 頂部功能區：歷史 (左) + 錯題本/收藏 (右) -->
+        <!-- 頂部右側操作區 -->
         <div class="top-actions-group">
           <button class="history-btn" id="openHistoryBtn">📜 歷史</button>
           <button class="mistake-btn" id="openMistakeBtn">
@@ -730,9 +730,9 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v15";
-    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v4";
-    const HISTORY_STORAGE_KEY = "vocab_app_history_v1";
+    const PREF_KEY = "vocab_app_prefs_v16";
+    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v5";
+    const HISTORY_STORAGE_KEY = "vocab_app_history_v2";
 
     const SVG_HOLLOW_STAR = `
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -771,7 +771,6 @@
     let quizAnswered = false;
     let quizStats = { total: 0, correct: 0 };
 
-    // 錯題本與歷史隊列
     let mistakeBook = [];
     let historyList = [];
 
@@ -813,10 +812,8 @@
       } catch (e) {}
     }
 
-    // 核心：無論 Study 抑或 Quiz，均自動記錄最新題目入歷史（上限 20 個）
     function recordToHistory(wordObj) {
       if (!wordObj || !wordObj.word) return;
-      // 避免連續重複加入相同單字
       if (historyList.length > 0 && historyList.at(0).word.toLowerCase() === wordObj.word.toLowerCase()) {
         return;
       }
@@ -826,7 +823,6 @@
       }
       saveHistory();
 
-      // 預載中文翻譯
       if (!wordObj.zh) {
         translateText(wordObj.word).then(trans => {
           wordObj.zh = trans;
@@ -1028,7 +1024,6 @@
       const randomIdx = Math.floor(Math.random() * filteredDataset.length);
       currentItem = filteredDataset.at(randomIdx);
 
-      // 核心：無論是 Study 定係 Quiz，皆即刻寫入歷史隊列！
       recordToHistory(currentItem);
 
       if (isQuizMode) {
