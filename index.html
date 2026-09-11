@@ -12,7 +12,7 @@
       --accent-green-bg: #ecfdf5;
       --accent-green-border: #a7f3d0;
       --accent-purple: #7c3aed;
-      --bg: #f8fafc;
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-muted: #64748b;
@@ -151,7 +151,7 @@
       justify-content: space-between;
     }
 
-    /* 單字主卡片：重構為自然流式，消除大片空白 */
+    /* 單字主卡片 */
     .card {
       background: var(--card-bg);
       border-radius: 16px;
@@ -161,7 +161,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* 消除 space-around 的巨大空隙 */
+      justify-content: flex-start;
       gap: 0.75rem;
       min-height: 0;
       overflow-y: auto;
@@ -208,7 +208,7 @@
     .cefr-badge.b2, .cefr-badge.b1 { background: #e0f2fe; color: #0369a1; }
     .cefr-badge.a2, .cefr-badge.a1 { background: #dcfce7; color: #15803d; }
 
-    /* 精美中文核心意思膠囊標籤 */
+    /* 中文核心意思膠囊 */
     .zh-badge {
       display: inline-flex;
       align-items: center;
@@ -290,7 +290,7 @@
       font-weight: 500;
     }
 
-    /* 例句區塊：跟隨在釋義正下方 */
+    /* 例句區塊 */
     .example-wrap {
       background: #f8fafc;
       padding: 0.75rem 1rem;
@@ -562,7 +562,7 @@
       <span id="quizScoreText" style="display:none;color:#7c3aed;">得分：0 / 0</span>
     </div>
 
-    <!-- 主卡片：緊湊自然流佈局 -->
+    <!-- 主卡片 -->
     <div class="card">
       <div class="word-row">
         <div class="word-main">
@@ -596,7 +596,7 @@
         </div>
       </div>
 
-      <!-- 模式一：學習模式 (緊湊排列) -->
+      <!-- 模式一：學習模式 -->
       <div id="learnView" style="display:flex; flex-direction:column; gap:0.75rem;">
         <div class="def-block">
           <div class="def-en" id="defEnText">---</div>
@@ -609,7 +609,7 @@
         </div>
       </div>
 
-      <!-- 模式二：QUIZ MODE -->
+      <!-- 模式二：QUIZ MODE (徹底修復 undefined) -->
       <div class="quiz-body" id="quizView">
         <div class="quiz-title-row">
           <span>🎯 請選出正確的中英文解釋：</span>
@@ -640,7 +640,7 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v9";
+    const PREF_KEY = "vocab_app_prefs_v10";
 
     const c2WordList = [
       { word: "ubiquitous", pos: "adjective", level: "C2", ipa: "/juːˈbɪk.wə.təs/", zh: "無處不在的", definition: "seeming to be in all places at the same time", zhDef: "似乎無所不在的；十分普遍的", examples: ["Smartphones have become ubiquitous in daily life."] },
@@ -703,7 +703,7 @@
     async function translateText(text) {
       if (!text || typeof text !== "string") return "";
       const clean = text.trim();
-      if (!clean || clean === "NaN" || clean === "null") return "";
+      if (!clean || clean === "NaN" || clean === "null" || clean === "undefined") return "";
       if (translationCache[clean]) return translationCache[clean];
 
       try {
@@ -711,7 +711,7 @@
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
-          const trans = data[0].map(item => item[0]).join('').trim();
+          const trans = data.at(0).map(item => item.at(0)).join('').trim();
           if (trans) {
             translationCache[clean] = trans;
             return trans;
@@ -778,7 +778,7 @@
         
         const oxfordWords = rawList
           .map(normalizeItem)
-          .filter(w => w.word.length > 0 && w.definition.length > 5);
+          .filter(w => w.word && w.word.length > 0 && w.definition && w.definition.length > 5);
 
         fullDataset = [...c2WordList, ...oxfordWords];
       } catch (err) {
@@ -808,7 +808,7 @@
       if (filteredDataset.length === 0) return;
 
       const randomIdx = Math.floor(Math.random() * filteredDataset.length);
-      const chosenWord = filteredDataset[randomIdx];
+      const chosenWord = filteredDataset.at(randomIdx);
 
       if (isQuizMode) {
         generateQuiz(chosenWord);
@@ -825,7 +825,7 @@
     function goBackHistory() {
       if (historyPointer > 0 && !isQuizMode) {
         historyPointer--;
-        renderCard(historyQueue[historyPointer]);
+        renderCard(historyQueue.at(historyPointer));
       }
     }
 
@@ -857,6 +857,7 @@
       }
     }
 
+    // 核心修復：使用解構賦值，絕無 被消除的風險！
     async function generateQuiz(targetWord) {
       currentQuizItem = targetWord;
       quizAnswered = false;
@@ -873,20 +874,27 @@
       document.getElementById("zhWordBadge").style.display = "none";
 
       const pool = (filteredDataset.length >= 3 ? filteredDataset : fullDataset)
-        .filter(w => w.definition && w.definition.length > 5);
+        .filter(w => w && w.word && w.definition && w.definition.length > 5);
 
       const distractors = [];
       while (distractors.length < 2) {
-        const rand = pool[Math.floor(Math.random() * pool.length)];
+        const rand = pool.at(Math.floor(Math.random() * pool.length));
         if (rand && rand.word !== targetWord.word && !distractors.some(d => d.word === rand.word)) {
           distractors.push(rand);
         }
       }
 
+      // 核心修正：使用 ES6 解構賦值（避開容易被後台過濾規則誤殺的 語法）
+      const [distractorA, distractorB] = distractors;
+
+      // 防呆保護：若極端情況缺失，自動使用備用單字
+      const safeDistA = distractorA && distractorA.definition ? distractorA : fallbackWords.at(0);
+      const safeDistB = distractorB && distractorB.definition ? distractorB : fallbackWords.at(1);
+
       const options = [
         { isCorrect: true, item: targetWord },
-        { isCorrect: false, item: distractors[0] },
-        { isCorrect: false, item: distractors }
+        { isCorrect: false, item: safeDistA },
+        { isCorrect: false, item: safeDistB }
       ].sort(() => Math.random() - 0.5);
 
       const letters = ["A", "B", "C"];
@@ -898,10 +906,12 @@
         card.className = "quiz-card";
         card.dataset.correct = opt.isCorrect ? "true" : "false";
 
+        const validItem = opt.item && opt.item.definition ? opt.item : targetWord;
+
         card.innerHTML = `
-          <div class="quiz-letter">${letters[idx]}</div>
+          <div class="quiz-letter">${letters.at(idx)}</div>
           <div class="quiz-desc">
-            <div class="quiz-en">${opt.item.definition}</div>
+            <div class="quiz-en">${validItem.definition}</div>
             <div class="quiz-zh">中文載入中...</div>
           </div>
         `;
@@ -909,16 +919,16 @@
         const zhEl = card.querySelector(".quiz-zh");
 
         const resolveZh = async () => {
-          let wordZh = opt.item.zh;
-          if (!wordZh) {
-            wordZh = await translateText(opt.item.word);
-            opt.item.zh = wordZh;
+          let wordZh = validItem.zh;
+          if (!wordZh || wordZh === "undefined") {
+            wordZh = await translateText(validItem.word);
+            validItem.zh = wordZh;
           }
 
-          let defZh = opt.item.zhDef;
-          if (!defZh) {
-            defZh = await translateText(opt.item.definition);
-            opt.item.zhDef = defZh;
+          let defZh = validItem.zhDef;
+          if (!defZh || defZh === "undefined") {
+            defZh = await translateText(validItem.definition);
+            validItem.zhDef = defZh;
           }
 
           if (wordZh && defZh) {
@@ -928,7 +938,7 @@
           } else if (wordZh) {
             zhEl.textContent = `【中文】${wordZh}`;
           } else {
-            zhEl.textContent = `【中文】${opt.item.word}`;
+            zhEl.textContent = `【中文】${validItem.word}`;
           }
         };
 
@@ -998,8 +1008,8 @@
         prevBtn.style.display = "inline-flex";
         scoreText.style.display = "none";
 
-        if (historyQueue[historyPointer]) {
-          renderCard(historyQueue[historyPointer]);
+        if (historyQueue.at(historyPointer)) {
+          renderCard(historyQueue.at(historyPointer));
         }
       }
     });
@@ -1019,7 +1029,7 @@
       zhBadge.style.display = "inline-flex";
       defZhEl.style.display = "block";
 
-      if (item.zh) {
+      if (item.zh && item.zh !== "undefined") {
         zhWordEl.textContent = item.zh;
       } else {
         zhWordEl.textContent = "查詢中...";
@@ -1029,7 +1039,7 @@
         });
       }
 
-      if (item.zhDef) {
+      if (item.zhDef && item.zhDef !== "undefined") {
         defZhEl.textContent = item.zhDef;
       } else {
         translateText(item.definition).then(trans => {
@@ -1048,7 +1058,6 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // 難度 Pill 點擊
     document.querySelectorAll(".level-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const level = pill.dataset.level;
@@ -1082,8 +1091,8 @@
     });
 
     document.getElementById("showZhToggle").addEventListener("change", () => {
-      if (!isQuizMode && historyQueue[historyPointer]) {
-        updateChineseTranslations(historyQueue[historyPointer]);
+      if (!isQuizMode && historyQueue.at(historyPointer)) {
+        updateChineseTranslations(historyQueue.at(historyPointer));
       }
       saveUserPreferences();
     });
@@ -1091,19 +1100,18 @@
     document.getElementById("autoPronounceToggle").addEventListener("change", saveUserPreferences);
 
     document.getElementById("ukAudioBtn").addEventListener("click", () => {
-      const w = isQuizMode ? currentQuizItem?.word : historyQueue[historyPointer]?.word;
+      const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
       if (w) speak(w, "en-GB");
     });
 
     document.getElementById("usAudioBtn").addEventListener("click", () => {
-      const w = isQuizMode ? currentQuizItem?.word : historyQueue[historyPointer]?.word;
+      const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
       if (w) speak(w, "en-US");
     });
 
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
     document.getElementById("prevBtn").addEventListener("click", goBackHistory);
 
-    // 歷史記錄彈窗
     const historyModal = document.getElementById("historyModal");
     const historyBtn = document.getElementById("historyBtn");
     const closeModalBtn = document.getElementById("closeModalBtn");
@@ -1131,7 +1139,7 @@
             const targetIdx = historyQueue.lastIndexOf(item);
             if (targetIdx !== -1) {
               historyPointer = targetIdx;
-              renderCard(historyQueue[historyPointer]);
+              renderCard(historyQueue.at(historyPointer));
             }
             historyModal.classList.remove("open");
           });
@@ -1147,7 +1155,6 @@
       if (e.target === historyModal) historyModal.classList.remove("open");
     });
 
-    // 鍵盤快速鍵
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT") return;
       if (e.key === "ArrowLeft") {
@@ -1156,11 +1163,11 @@
         drawRandomNextWord();
       } else if (e.key === " " || e.key === "1") {
         e.preventDefault();
-        const w = isQuizMode ? currentQuizItem?.word : historyQueue[historyPointer]?.word;
+        const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
         if (w) speak(w, "en-GB");
       } else if (e.key === "2") {
         e.preventDefault();
-        const w = isQuizMode ? currentQuizItem?.word : historyQueue[historyPointer]?.word;
+        const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
         if (w) speak(w, "en-US");
       }
     });
