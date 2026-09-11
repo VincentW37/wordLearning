@@ -12,6 +12,7 @@
       --accent-green-bg: #ecfdf5;
       --accent-green-border: #a7f3d0;
       --accent-purple: #7c3aed;
+      --accent-yellow: #f59e0b;
       --bg: #f1f5f9;
       --card-bg: #ffffff;
       --text: #0f172a;
@@ -125,22 +126,27 @@
       user-select: none;
     }
 
-    .history-btn {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      padding: 0.2rem 0.6rem;
+    /* ⭐ 錯題本按鈕 */
+    .mistake-btn {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 0.25rem 0.65rem;
       border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 700;
       cursor: pointer;
-      color: var(--primary);
+      color: #b45309;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.15s;
     }
 
-    .history-btn:hover {
-      background: #e2e8f0;
+    .mistake-btn:hover {
+      background: #fef3c7;
     }
 
-    /* 總數資訊 */
+    /* 總數資訊列 */
     .count-info {
       font-size: 0.78rem;
       font-weight: 600;
@@ -171,7 +177,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
       gap: 0.4rem;
     }
 
@@ -179,6 +184,7 @@
       display: flex;
       align-items: baseline;
       gap: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .word-title {
@@ -193,6 +199,31 @@
       font-style: italic;
       color: var(--text-muted);
       font-size: 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* 卡片上的 ⭐ 收藏切換圖示 */
+    .star-toggle-btn {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      color: #cbd5e1;
+      transition: transform 0.15s, color 0.15s;
+    }
+
+    .star-toggle-btn.starred {
+      color: #f59e0b;
+    }
+
+    .star-toggle-btn:hover {
+      transform: scale(1.15);
     }
 
     .cefr-badge {
@@ -407,22 +438,22 @@
 
     .quiz-card.locked { cursor: default; }
 
-    /* 底部控制列 */
+    /* 底部控制列（無歷史，純淨雙按鈕） */
     .bottom-bar {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
       width: 100%;
       flex-shrink: 0;
     }
 
     .btn-action {
-      height: 42px;
-      padding: 0 0.8rem;
-      border-radius: 10px;
+      height: 44px;
+      padding: 0 1.1rem;
+      border-radius: 12px;
       border: 1px solid var(--border);
       background: #fff;
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -436,37 +467,10 @@
       background: #7c3aed;
       color: #fff;
       border-color: #7c3aed;
-      flex-shrink: 0;
+      min-width: 110px;
     }
 
     .btn-quiz:hover { background: #6d28d9; }
-
-    .btn-prev {
-      background: #fff;
-      color: var(--text);
-      flex-shrink: 0;
-    }
-
-    .btn-prev:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .history-badge {
-      height: 42px;
-      padding: 0 0.6rem;
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
 
     .btn-next {
       background: var(--primary);
@@ -477,11 +481,11 @@
 
     .btn-next:hover { background: #1e293b; }
 
-    /* 歷史彈窗 */
+    /* 錯題本彈窗 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(2px);
       display: none;
       align-items: center;
@@ -492,16 +496,16 @@
     .modal-overlay.open { display: flex; }
     .modal-card {
       background: #fff;
-      border-radius: 14px;
+      border-radius: 16px;
       width: 100%;
-      max-width: 440px;
-      max-height: 70vh;
+      max-width: 460px;
+      max-height: 72vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
     .modal-header {
-      padding: 0.85rem 1.1rem;
+      padding: 0.9rem 1.15rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
@@ -509,13 +513,14 @@
       font-weight: 700;
     }
     .modal-body {
-      padding: 0.75rem 1.1rem;
+      padding: 0.75rem 1.15rem;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 0.45rem;
+      flex: 1;
     }
-    .history-item {
+    .mistake-item {
       padding: 0.6rem 0.85rem;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -524,8 +529,34 @@
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    .history-item:hover { background: #eff6ff; }
+    .mistake-item:hover { background: #eff6ff; }
+    .mistake-word-info {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+    .delete-mistake-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .delete-mistake-btn:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+    .modal-footer {
+      padding: 0.75rem 1.15rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -552,11 +583,12 @@
             <input type="checkbox" id="autoPronounceToggle"> 自動發音
           </label>
         </div>
-        <button class="history-btn" id="historyBtn">📜 歷史 (10)</button>
+        <!-- ⭐ 錯題本入口 -->
+        <button class="mistake-btn" id="openMistakeBtn">⭐ 錯題本 (<span id="mistakeCountBadge">0</span>)</button>
       </div>
     </div>
 
-    <!-- 總數資訊 -->
+    <!-- 總數與得分資訊 -->
     <div class="count-info">
       <span id="countSummary">詞庫載入中...</span>
       <span id="quizScoreText" style="display:none;color:#7c3aed;">得分：0 / 0</span>
@@ -569,7 +601,10 @@
           <h1 class="word-title" id="wordText">---</h1>
           <span class="pos-tag" id="posText"></span>
         </div>
-        <div id="cefrBadge" class="cefr-badge b2">B2</div>
+        <div class="header-actions">
+          <button class="star-toggle-btn" id="cardStarBtn" title="加入/移出錯題本">⭐</button>
+          <div id="cefrBadge" class="cefr-badge b2">B2</div>
+        </div>
       </div>
 
       <!-- 核心中文詞義膠囊 -->
@@ -618,29 +653,32 @@
       </div>
     </div>
 
-    <!-- 底部控制列 -->
+    <!-- 底部控制列（無歷史，純粹清爽的雙按鈕） -->
     <div class="bottom-bar">
       <button class="btn-action btn-quiz" id="toggleQuizBtn">🎮 QUIZ</button>
-      <button class="btn-action btn-prev" id="prevBtn" disabled>← 上一個</button>
-      <div class="history-badge" id="historyIndicator">1 / 1</div>
-      <button class="btn-action btn-next" id="nextBtn">下一個 🎲</button>
+      <button class="btn-action btn-next" id="nextBtn">隨機下一個 🎲</button>
     </div>
   </div>
 
-  <!-- 歷史彈窗 -->
-  <div class="modal-overlay" id="historyModal">
+  <!-- ⭐ 錯題本彈窗 -->
+  <div class="modal-overlay" id="mistakeModal">
     <div class="modal-card">
       <div class="modal-header">
-        <span>📜 最近學習記錄（最多 10 個）</span>
-        <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;" id="closeModalBtn">&times;</button>
+        <span>⭐ 我的錯題本 / 收藏夾</span>
+        <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;" id="closeMistakeBtn">&times;</button>
       </div>
-      <div class="modal-body" id="historyListContainer"></div>
+      <div class="modal-body" id="mistakeListContainer"></div>
+      <div class="modal-footer">
+        <span style="font-size:0.8rem;color:var(--text-muted);">答錯自動收錄，點擊可重溫</span>
+        <button id="clearAllMistakesBtn" style="background:none;border:none;color:#ef4444;font-size:0.8rem;cursor:pointer;font-weight:600;">清空全部</button>
+      </div>
     </div>
   </div>
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v11";
+    const PREF_KEY = "vocab_app_prefs_v12";
+    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v1";
 
     const c2WordList = [
       { word: "ubiquitous", pos: "adjective", level: "C2", ipa: "/juːˈbɪk.wə.təs/", zh: "無處不在的", definition: "seeming to be in all places at the same time", zhDef: "似乎無所不在的；十分普遍的", examples: ["Smartphones have become ubiquitous in daily life."] },
@@ -662,19 +700,71 @@
     let filteredDataset = [];
     const translationCache = {};
 
-    let historyQueue = [];
-    let historyPointer = -1;
-
+    let currentItem = null;
     let isQuizMode = false;
     let quizAnswered = false;
     let quizStats = { total: 0, correct: 0 };
-    let currentQuizItem = null;
+
+    // ⭐ 錯題本資料結構 (來自 LocalStorage)
+    let mistakeBook = [];
 
     let userPrefs = {
       selectedLevels: ["ALL"],
       showZh: true,
       autoPronounce: false
     };
+
+    // 讀取 LocalStorage 中的錯題本
+    function loadMistakeBook() {
+      try {
+        const saved = localStorage.getItem(MISTAKE_STORAGE_KEY);
+        if (saved) {
+          mistakeBook = JSON.parse(saved);
+        }
+      } catch (e) {
+        mistakeBook = [];
+      }
+      updateMistakeBadge();
+    }
+
+    function saveMistakeBook() {
+      try {
+        localStorage.setItem(MISTAKE_STORAGE_KEY, JSON.stringify(mistakeBook));
+      } catch (e) {}
+      updateMistakeBadge();
+    }
+
+    function updateMistakeBadge() {
+      document.getElementById("mistakeCountBadge").textContent = mistakeBook.length;
+      updateCardStarStatus();
+    }
+
+    function isCurrentWordInMistakes() {
+      if (!currentItem) return false;
+      return mistakeBook.some(m => m.word.toLowerCase() === currentItem.word.toLowerCase());
+    }
+
+    function updateCardStarStatus() {
+      const starBtn = document.getElementById("cardStarBtn");
+      if (isCurrentWordInMistakes()) {
+        starBtn.classList.add("starred");
+      } else {
+        starBtn.classList.remove("starred");
+      }
+    }
+
+    function addWordToMistakes(wordObj) {
+      if (!wordObj || !wordObj.word) return;
+      if (!mistakeBook.some(m => m.word.toLowerCase() === wordObj.word.toLowerCase())) {
+        mistakeBook.unshift(wordObj);
+        saveMistakeBook();
+      }
+    }
+
+    function removeWordFromMistakes(wordStr) {
+      mistakeBook = mistakeBook.filter(m => m.word.toLowerCase() !== wordStr.toLowerCase());
+      saveMistakeBook();
+    }
 
     function loadUserPreferences() {
       try {
@@ -769,6 +859,7 @@
 
     async function initVocabulary() {
       loadUserPreferences();
+      loadMistakeBook();
 
       try {
         const res = await fetch(OXFORD_5000_URL);
@@ -804,40 +895,26 @@
         `詞庫總數：${fullDataset.length.toLocaleString()} 字（符合：${filteredDataset.length.toLocaleString()}）`;
     }
 
-    // 核心修正：無論係學習模式定係 QUIZ MODE，抽中的生字一律寫入歷史隊列 (historyQueue)！
+    // 隨機抽字
     function drawRandomNextWord() {
       if (filteredDataset.length === 0) return;
 
       const randomIdx = Math.floor(Math.random() * filteredDataset.length);
-      const chosenWord = filteredDataset.at(randomIdx);
+      currentItem = filteredDataset.at(randomIdx);
 
-      // 統一歷程推入邏輯
-      if (historyPointer < historyQueue.length - 1) {
-        historyQueue = historyQueue.slice(0, historyPointer + 1);
-      }
-      historyQueue.push(chosenWord);
-      historyPointer = historyQueue.length - 1;
-
-      // 同步預先加載該詞的中文，保證歷史記錄中有中文顯示
-      if (!chosenWord.zh) {
-        translateText(chosenWord.word).then(trans => {
-          chosenWord.zh = trans;
+      if (!currentItem.zh) {
+        translateText(currentItem.word).then(trans => {
+          currentItem.zh = trans;
         });
       }
 
       if (isQuizMode) {
-        generateQuiz(chosenWord);
-        document.getElementById("historyIndicator").textContent = `${historyPointer + 1} / ${historyQueue.length}`;
+        generateQuiz(currentItem);
       } else {
-        renderCard(chosenWord);
+        renderCard(currentItem);
       }
-    }
 
-    function goBackHistory() {
-      if (historyPointer > 0 && !isQuizMode) {
-        historyPointer--;
-        renderCard(historyQueue.at(historyPointer));
-      }
+      updateCardStarStatus();
     }
 
     async function renderCard(item) {
@@ -857,10 +934,6 @@
       const container = document.getElementById("examplesContainer");
       container.innerHTML = item.examples.map(ex => `<div class="example-text">• ${ex}</div>`).join("");
 
-      document.getElementById("prevBtn").disabled = historyPointer <= 0;
-      document.getElementById("historyIndicator").textContent = 
-        `${historyPointer + 1} / ${historyQueue.length}`;
-
       updateChineseTranslations(item);
 
       if (document.getElementById("autoPronounceToggle").checked) {
@@ -868,9 +941,8 @@
       }
     }
 
-    // 產生測驗題目 (已徹底免疫 undefined)
+    // 產生測驗題目
     async function generateQuiz(targetWord) {
-      currentQuizItem = targetWord;
       quizAnswered = false;
 
       document.getElementById("wordText").textContent = targetWord.word;
@@ -895,9 +967,7 @@
         }
       }
 
-      // 使用 ES6 解構賦值，安全取值
       const [distractorA, distractorB] = distractors;
-
       const safeDistA = distractorA && distractorA.definition ? distractorA : fallbackWords.at(0);
       const safeDistB = distractorB && distractorB.definition ? distractorB : fallbackWords.at(1);
 
@@ -963,12 +1033,18 @@
       }
     }
 
+    // 答題反饋：答錯時自動收錄至 ⭐ 錯題本 (LocalStorage)
     function handleQuizSelection(selectedCard, isCorrect) {
       if (quizAnswered) return;
       quizAnswered = true;
 
       quizStats.total++;
-      if (isCorrect) quizStats.correct++;
+      if (isCorrect) {
+        quizStats.correct++;
+      } else {
+        // 核心邏輯：答錯自動入錯題本！
+        addWordToMistakes(currentItem);
+      }
 
       const scoreText = document.getElementById("quizScoreText");
       scoreText.style.display = "inline";
@@ -983,15 +1059,23 @@
       if (!isCorrect) selectedCard.classList.add("wrong");
     }
 
-    // 模式切換
+    // 卡片手動收藏按鈕點擊
+    document.getElementById("cardStarBtn").addEventListener("click", () => {
+      if (!currentItem) return;
+      if (isCurrentWordInMistakes()) {
+        removeWordFromMistakes(currentItem.word);
+      } else {
+        addWordToMistakes(currentItem);
+      }
+    });
+
+    // 學習模式 vs QUIZ MODE 切換
     document.getElementById("toggleQuizBtn").addEventListener("click", () => {
       isQuizMode = !isQuizMode;
 
       const toggleBtn = document.getElementById("toggleQuizBtn");
       const learnView = document.getElementById("learnView");
       const quizView = document.getElementById("quizView");
-      const prevBtn = document.getElementById("prevBtn");
-      const historyIndicator = document.getElementById("historyIndicator");
       const scoreText = document.getElementById("quizScoreText");
 
       if (isQuizMode) {
@@ -1001,9 +1085,6 @@
 
         learnView.style.display = "none";
         quizView.style.display = "flex";
-
-        prevBtn.style.display = "none";
-        historyIndicator.textContent = "測驗";
         scoreText.style.display = "inline";
 
         drawRandomNextWord();
@@ -1014,13 +1095,9 @@
 
         learnView.style.display = "flex";
         quizView.style.display = "none";
-
-        prevBtn.style.display = "inline-flex";
         scoreText.style.display = "none";
 
-        if (historyQueue.at(historyPointer)) {
-          renderCard(historyQueue.at(historyPointer));
-        }
+        if (currentItem) renderCard(currentItem);
       }
     });
 
@@ -1068,6 +1145,7 @@
       window.speechSynthesis.speak(utterance);
     }
 
+    // 難度 Pill 點擊
     document.querySelectorAll(".level-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         const level = pill.dataset.level;
@@ -1101,86 +1179,99 @@
     });
 
     document.getElementById("showZhToggle").addEventListener("change", () => {
-      if (!isQuizMode && historyQueue.at(historyPointer)) {
-        updateChineseTranslations(historyQueue.at(historyPointer));
-      }
+      if (!isQuizMode && currentItem) updateChineseTranslations(currentItem);
       saveUserPreferences();
     });
 
     document.getElementById("autoPronounceToggle").addEventListener("change", saveUserPreferences);
 
     document.getElementById("ukAudioBtn").addEventListener("click", () => {
-      const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
-      if (w) speak(w, "en-GB");
+      if (currentItem) speak(currentItem.word, "en-GB");
     });
 
     document.getElementById("usAudioBtn").addEventListener("click", () => {
-      const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
-      if (w) speak(w, "en-US");
+      if (currentItem) speak(currentItem.word, "en-US");
     });
 
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
-    document.getElementById("prevBtn").addEventListener("click", goBackHistory);
 
-    // 歷史記錄彈窗：無論測驗定學習模式，均完整顯示最近 10 個做過的題目
-    const historyModal = document.getElementById("historyModal");
-    const historyBtn = document.getElementById("historyBtn");
-    const closeModalBtn = document.getElementById("closeModalBtn");
-    const historyListContainer = document.getElementById("historyListContainer");
+    // ⭐ 錯題本彈窗控制
+    const mistakeModal = document.getElementById("mistakeModal");
+    const openMistakeBtn = document.getElementById("openMistakeBtn");
+    const closeMistakeBtn = document.getElementById("closeMistakeBtn");
+    const mistakeListContainer = document.getElementById("mistakeListContainer");
+    const clearAllMistakesBtn = document.getElementById("clearAllMistakesBtn");
 
-    historyBtn.addEventListener("click", () => {
-      const recentWords = [...historyQueue].reverse().slice(0, 10);
-      historyListContainer.innerHTML = "";
+    function renderMistakeModal() {
+      mistakeListContainer.innerHTML = "";
 
-      if (recentWords.length === 0) {
-        historyListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:1rem;'>暫無學習歷史</div>";
-      } else {
-        recentWords.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "history-item";
-          div.innerHTML = `
-            <div>
-              <span style="font-weight:700;color:var(--primary);">${item.word}</span>
-              <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;margin-left:4px;">${item.pos}</span>
-            </div>
-            <span style="font-size:0.85rem;color:#047857;font-weight:600;">${item.zh || "查看"}</span>
-          `;
-          div.addEventListener("click", () => {
-            // 點擊歷史題目時，切換回學習模式展示該題詳情
-            if (isQuizMode) document.getElementById("toggleQuizBtn").click();
-            const targetIdx = historyQueue.lastIndexOf(item);
-            if (targetIdx !== -1) {
-              historyPointer = targetIdx;
-              renderCard(historyQueue.at(historyPointer));
-            }
-            historyModal.classList.remove("open");
-          });
-          historyListContainer.appendChild(div);
-        });
+      if (mistakeBook.length === 0) {
+        mistakeListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>目前錯題本空空如也 🎉<br><span style='font-size:0.8rem;'>做測驗答錯或點擊單字旁的 ⭐ 即可收錄</span></div>";
+        return;
       }
 
-      historyModal.classList.add("open");
+      mistakeBook.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "mistake-item";
+        div.innerHTML = `
+          <div class="mistake-word-info">
+            <span style="font-weight:800;color:var(--primary);font-size:1.05rem;">${item.word}</span>
+            <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;">${item.pos}</span>
+            <span class="cefr-badge ${item.level.toLowerCase()}" style="padding:0.1rem 0.35rem;font-size:0.7rem;">${item.level}</span>
+            <span style="font-size:0.85rem;color:#047857;font-weight:600;margin-left:4px;">${item.zh || ""}</span>
+          </div>
+          <button class="delete-mistake-btn" title="移出錯題本">🗑️</button>
+        `;
+
+        // 點擊項目：載入卡片重溫
+        div.querySelector(".mistake-word-info").addEventListener("click", () => {
+          if (isQuizMode) document.getElementById("toggleQuizBtn").click();
+          currentItem = item;
+          renderCard(currentItem);
+          updateCardStarStatus();
+          mistakeModal.classList.remove("open");
+        });
+
+        // 點擊垃圾桶：移出錯題本
+        div.querySelector(".delete-mistake-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeWordFromMistakes(item.word);
+          renderMistakeModal();
+        });
+
+        mistakeListContainer.appendChild(div);
+      });
+    }
+
+    openMistakeBtn.addEventListener("click", () => {
+      renderMistakeModal();
+      mistakeModal.classList.add("open");
     });
 
-    closeModalBtn.addEventListener("click", () => historyModal.classList.remove("open"));
-    historyModal.addEventListener("click", (e) => {
-      if (e.target === historyModal) historyModal.classList.remove("open");
+    closeMistakeBtn.addEventListener("click", () => mistakeModal.classList.remove("open"));
+    mistakeModal.addEventListener("click", (e) => {
+      if (e.target === mistakeModal) mistakeModal.classList.remove("open");
     });
 
+    clearAllMistakesBtn.addEventListener("click", () => {
+      if (confirm("確定要清空所有錯題記錄嗎？")) {
+        mistakeBook = [];
+        saveMistakeBook();
+        renderMistakeModal();
+      }
+    });
+
+    // 鍵盤快速鍵 (→ 下一個 / 1 英音 / 2 美音)
     window.addEventListener("keydown", (e) => {
       if (e.target.tagName === "INPUT") return;
-      if (e.key === "ArrowLeft") {
-        goBackHistory();
-      } else if (e.key === "ArrowRight") {
+      if (e.key === "ArrowRight") {
         drawRandomNextWord();
       } else if (e.key === " " || e.key === "1") {
         e.preventDefault();
-        const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
-        if (w) speak(w, "en-GB");
+        if (currentItem) speak(currentItem.word, "en-GB");
       } else if (e.key === "2") {
         e.preventDefault();
-        const w = isQuizMode ? currentQuizItem?.word : historyQueue.at(historyPointer)?.word;
-        if (w) speak(w, "en-US");
+        if (currentItem) speak(currentItem.word, "en-US");
       }
     });
 
