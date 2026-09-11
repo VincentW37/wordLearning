@@ -115,7 +115,7 @@
 
     .toggles-group {
       display: flex;
-      gap: 0.8rem;
+      gap: 0.65rem;
     }
 
     .toggle-label {
@@ -124,21 +124,48 @@
       gap: 0.3rem;
       cursor: pointer;
       user-select: none;
+      font-size: 0.78rem;
     }
 
-    /* 頂部「錯題本/收藏」按鈕 */
+    /* 右側按鈕群組：歷史 + 錯題本/收藏 */
+    .top-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .history-btn {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 0.22rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .history-btn:hover {
+      background: #e2e8f0;
+    }
+
     .mistake-btn {
       background: #f8fafc;
       border: 1px solid var(--border);
       padding: 0.22rem 0.65rem;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       color: var(--text-muted);
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
       white-space: nowrap;
       transition: all 0.15s;
     }
@@ -486,7 +513,7 @@
 
     .btn-next:hover { background: #1e293b; }
 
-    /* 錯題本/收藏彈窗 */
+    /* 通用彈窗樣式 (歷史 / 錯題本共用) */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -525,7 +552,7 @@
       gap: 0.45rem;
       flex: 1;
     }
-    .mistake-item {
+    .list-item-card {
       padding: 0.6rem 0.85rem;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -536,13 +563,13 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .mistake-item:hover { background: #eff6ff; }
-    .mistake-word-info {
+    .list-item-card:hover { background: #eff6ff; }
+    .item-word-info {
       display: flex;
       align-items: baseline;
       gap: 0.4rem;
     }
-    .delete-mistake-btn {
+    .delete-item-btn {
       background: none;
       border: none;
       color: #94a3b8;
@@ -551,7 +578,7 @@
       padding: 4px;
       border-radius: 4px;
     }
-    .delete-mistake-btn:hover {
+    .delete-item-btn:hover {
       color: #ef4444;
       background: #fee2e2;
     }
@@ -588,10 +615,14 @@
             <input type="checkbox" id="autoPronounceToggle"> 自動發音
           </label>
         </div>
-        <!-- 頂部按鈕：更新為「錯題本/收藏」 -->
-        <button class="mistake-btn" id="openMistakeBtn">
-          <span id="topStarIcon"></span> 錯題本/收藏 (<span id="mistakeCountBadge">0</span>)
-        </button>
+
+        <!-- 頂部功能區：歷史 (左) + 錯題本/收藏 (右) -->
+        <div class="top-actions-group">
+          <button class="history-btn" id="openHistoryBtn">📜 歷史</button>
+          <button class="mistake-btn" id="openMistakeBtn">
+            <span id="topStarIcon"></span> 錯題本/收藏 (<span id="mistakeCountBadge">0</span>)
+          </button>
+        </div>
       </div>
     </div>
 
@@ -667,7 +698,22 @@
     </div>
   </div>
 
-  <!-- 錯題本/收藏彈窗 -->
+  <!-- 📜 歷史記錄彈窗 (最多 20 個) -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>📜 最近學習／測驗記錄（最多 20 個）</span>
+        <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;" id="closeHistoryBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="historyListContainer"></div>
+      <div class="modal-footer">
+        <span style="font-size:0.8rem;color:var(--text-muted);">點擊任何單字即可跳轉複習</span>
+        <button id="clearHistoryBtn" style="background:none;border:none;color:var(--text-muted);font-size:0.8rem;cursor:pointer;">清空歷史</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⭐ 錯題本/收藏彈窗 -->
   <div class="modal-overlay" id="mistakeModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -684,10 +730,10 @@
 
   <script>
     const OXFORD_5000_URL = "https://raw.githubusercontent.com/winterdl/oxford-5000-vocabulary-audio-definition/main/data/oxford_5000.json";
-    const PREF_KEY = "vocab_app_prefs_v14";
-    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v3";
+    const PREF_KEY = "vocab_app_prefs_v15";
+    const MISTAKE_STORAGE_KEY = "vocab_app_mistakes_v4";
+    const HISTORY_STORAGE_KEY = "vocab_app_history_v1";
 
-    // 向量星圖示 SVG（空心 vs 實心填色）
     const SVG_HOLLOW_STAR = `
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -725,7 +771,9 @@
     let quizAnswered = false;
     let quizStats = { total: 0, correct: 0 };
 
+    // 錯題本與歷史隊列
     let mistakeBook = [];
+    let historyList = [];
 
     let userPrefs = {
       selectedLevels: ["ALL"],
@@ -750,7 +798,43 @@
       updateMistakeBadge();
     }
 
-    // 更新頂部「錯題本/收藏」按鈕狀態
+    function loadHistory() {
+      try {
+        const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (saved) historyList = JSON.parse(saved);
+      } catch (e) {
+        historyList = [];
+      }
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyList));
+      } catch (e) {}
+    }
+
+    // 核心：無論 Study 抑或 Quiz，均自動記錄最新題目入歷史（上限 20 個）
+    function recordToHistory(wordObj) {
+      if (!wordObj || !wordObj.word) return;
+      // 避免連續重複加入相同單字
+      if (historyList.length > 0 && historyList.at(0).word.toLowerCase() === wordObj.word.toLowerCase()) {
+        return;
+      }
+      historyList.unshift(wordObj);
+      if (historyList.length > 20) {
+        historyList = historyList.slice(0, 20);
+      }
+      saveHistory();
+
+      // 預載中文翻譯
+      if (!wordObj.zh) {
+        translateText(wordObj.word).then(trans => {
+          wordObj.zh = trans;
+          saveHistory();
+        });
+      }
+    }
+
     function updateMistakeBadge() {
       const badge = document.getElementById("mistakeCountBadge");
       const btn = document.getElementById("openMistakeBtn");
@@ -902,6 +986,7 @@
     async function initVocabulary() {
       loadUserPreferences();
       loadMistakeBook();
+      loadHistory();
 
       try {
         const res = await fetch(OXFORD_5000_URL);
@@ -943,11 +1028,8 @@
       const randomIdx = Math.floor(Math.random() * filteredDataset.length);
       currentItem = filteredDataset.at(randomIdx);
 
-      if (!currentItem.zh) {
-        translateText(currentItem.word).then(trans => {
-          currentItem.zh = trans;
-        });
-      }
+      // 核心：無論是 Study 定係 Quiz，皆即刻寫入歷史隊列！
+      recordToHistory(currentItem);
 
       if (isQuizMode) {
         generateQuiz(currentItem);
@@ -1230,7 +1312,63 @@
 
     document.getElementById("nextBtn").addEventListener("click", drawRandomNextWord);
 
-    // 錯題本/收藏彈窗
+    // 📜 歷史記錄彈窗 (最多 20 個)
+    const historyModal = document.getElementById("historyModal");
+    const openHistoryBtn = document.getElementById("openHistoryBtn");
+    const closeHistoryBtn = document.getElementById("closeHistoryBtn");
+    const historyListContainer = document.getElementById("historyListContainer");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+    function renderHistoryModal() {
+      historyListContainer.innerHTML = "";
+
+      if (historyList.length === 0) {
+        historyListContainer.innerHTML = "<div style='color:var(--text-muted);text-align:center;padding:2rem;'>暫無學習／測驗歷史</div>";
+        return;
+      }
+
+      historyList.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "list-item-card";
+        div.innerHTML = `
+          <div class="item-word-info">
+            <span style="font-weight:800;color:var(--primary);font-size:1.02rem;">${item.word}</span>
+            <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;">${item.pos}</span>
+            <span class="cefr-badge ${item.level.toLowerCase()}" style="padding:0.1rem 0.35rem;font-size:0.7rem;">${item.level}</span>
+            <span style="font-size:0.85rem;color:#047857;font-weight:600;margin-left:4px;">${item.zh || ""}</span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text-muted);">查看 ➔</span>
+        `;
+
+        div.addEventListener("click", () => {
+          if (isQuizMode) document.getElementById("toggleQuizBtn").click();
+          currentItem = item;
+          renderCard(currentItem);
+          updateCardStarStatus();
+          historyModal.classList.remove("open");
+        });
+
+        historyListContainer.appendChild(div);
+      });
+    }
+
+    openHistoryBtn.addEventListener("click", () => {
+      renderHistoryModal();
+      historyModal.classList.add("open");
+    });
+
+    closeHistoryBtn.addEventListener("click", () => historyModal.classList.remove("open"));
+    historyModal.addEventListener("click", (e) => {
+      if (e.target === historyModal) historyModal.classList.remove("open");
+    });
+
+    clearHistoryBtn.addEventListener("click", () => {
+      historyList = [];
+      saveHistory();
+      renderHistoryModal();
+    });
+
+    // ⭐ 錯題本/收藏彈窗
     const mistakeModal = document.getElementById("mistakeModal");
     const openMistakeBtn = document.getElementById("openMistakeBtn");
     const closeMistakeBtn = document.getElementById("closeMistakeBtn");
@@ -1247,18 +1385,18 @@
 
       mistakeBook.forEach(item => {
         const div = document.createElement("div");
-        div.className = "mistake-item";
+        div.className = "list-item-card";
         div.innerHTML = `
-          <div class="mistake-word-info">
-            <span style="font-weight:800;color:var(--primary);font-size:1.05rem;">${item.word}</span>
+          <div class="item-word-info">
+            <span style="font-weight:800;color:var(--primary);font-size:1.02rem;">${item.word}</span>
             <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;">${item.pos}</span>
             <span class="cefr-badge ${item.level.toLowerCase()}" style="padding:0.1rem 0.35rem;font-size:0.7rem;">${item.level}</span>
             <span style="font-size:0.85rem;color:#047857;font-weight:600;margin-left:4px;">${item.zh || ""}</span>
           </div>
-          <button class="delete-mistake-btn" title="移出錯題本/收藏">🗑️</button>
+          <button class="delete-item-btn" title="移出錯題本/收藏">🗑️</button>
         `;
 
-        div.querySelector(".mistake-word-info").addEventListener("click", () => {
+        div.querySelector(".item-word-info").addEventListener("click", () => {
           if (isQuizMode) document.getElementById("toggleQuizBtn").click();
           currentItem = item;
           renderCard(currentItem);
@@ -1266,7 +1404,7 @@
           mistakeModal.classList.remove("open");
         });
 
-        div.querySelector(".delete-mistake-btn").addEventListener("click", (e) => {
+        div.querySelector(".delete-item-btn").addEventListener("click", (e) => {
           e.stopPropagation();
           removeWordFromMistakes(item.word);
           renderMistakeModal();
